@@ -8,16 +8,16 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Iterator;
 
-import frames.MapDrawPanel;
+import frames.MapViewPanel;
 
 @SuppressWarnings("serial")
 public class PanMap extends Rectangle {
 	/* Dimensions */
-	public static final int WIDTH = MapDrawPanel.getGridSize() * 16;
-	public static final int HEIGHT = MapDrawPanel.getGridSize() * 8;
+	public static final int WIDTH = MapViewPanel.getNodeSize() * 16;
+	public static final int HEIGHT = MapViewPanel.getNodeSize() * 8;
 	public static final float BORDER_SIZE = 2.0f;
 	public static final float CONNECTION_SIZE = 1.5f;
-	
+
 	private PanNode parent;
 	
 	protected String panName;
@@ -141,13 +141,13 @@ public class PanMap extends Rectangle {
 		
 		// offseting port location if arrow is present
 		if(b_leftArrow)
-			portLeft.x -= MapDrawPanel.getGridSize();
+			portLeft.x -= MapViewPanel.getNodeSize();
 		if(b_rightArrow)
-			portRight.x += MapDrawPanel.getGridSize();
+			portRight.x += MapViewPanel.getNodeSize();
 		if(b_topArrow)
-			portTop.y -= MapDrawPanel.getGridSize();
+			portTop.y -= MapViewPanel.getNodeSize();
 		if(b_bottomArrow)
-			portBot.y += MapDrawPanel.getGridSize();
+			portBot.y += MapViewPanel.getNodeSize();
 	}
 	
 	// Getters and Setters
@@ -361,22 +361,22 @@ public class PanMap extends Rectangle {
 		g.setColor(lineColor);
 		if(b_leftArrow && parent.getLeft() != null) {
 			g.drawLine(leftArrow.x, leftArrow.y, leftArrow.x - 6, leftArrow.y + 3);
-			g.drawLine(leftArrow.x, leftArrow.y, leftArrow.x - MapDrawPanel.getGridSize(), leftArrow.y);
+			g.drawLine(leftArrow.x, leftArrow.y, leftArrow.x - MapViewPanel.getNodeSize(), leftArrow.y);
 			g.drawLine(leftArrow.x, leftArrow.y, leftArrow.x - 6, leftArrow.y - 3);
 		}
 		if(b_rightArrow && parent.getRight() != null) {
 			g.drawLine(rightArrow.x, rightArrow.y, rightArrow.x + 6, rightArrow.y + 3);
-			g.drawLine(rightArrow.x, rightArrow.y, rightArrow.x + MapDrawPanel.getGridSize(), rightArrow.y);
+			g.drawLine(rightArrow.x, rightArrow.y, rightArrow.x + MapViewPanel.getNodeSize(), rightArrow.y);
 			g.drawLine(rightArrow.x, rightArrow.y, rightArrow.x + 6, rightArrow.y - 3);
 		}
 		if(b_topArrow && parent.getTop() != null) {
 			g.drawLine(topArrow.x, topArrow.y, topArrow.x + 3, topArrow.y - 6);
-			g.drawLine(topArrow.x, topArrow.y, topArrow.x, topArrow.y - MapDrawPanel.getGridSize());
+			g.drawLine(topArrow.x, topArrow.y, topArrow.x, topArrow.y - MapViewPanel.getNodeSize());
 			g.drawLine(topArrow.x, topArrow.y, topArrow.x -3, topArrow.y - 6);
 		}
 		if(b_bottomArrow && parent.getBot() != null) {
 			g.drawLine(botArrow.x, botArrow.y, botArrow.x + 3, botArrow.y + 6);
-			g.drawLine(botArrow.x, botArrow.y, botArrow.x, botArrow.y + MapDrawPanel.getGridSize());
+			g.drawLine(botArrow.x, botArrow.y, botArrow.x, botArrow.y + MapViewPanel.getNodeSize());
 			g.drawLine(botArrow.x, botArrow.y, botArrow.x - 3, botArrow.y + 6);
 		}
 	}

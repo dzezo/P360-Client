@@ -42,7 +42,7 @@ public class Main {
 		ChooserUtils.setWorkingDir(WORKING_DIR);
 		
 		// init
-		MainFrame mainFrame = new MainFrame("P360");
+		MainFrame mainFrame = new MainFrame("P360-Client");
 		
 		Camera camera = new Camera();
 		StaticShader shader = new StaticShader();

@@ -30,7 +30,6 @@ import input.InputManager;
 import panorama.PanGraph;
 import panorama.PanNode;
 import touring.TourManager;
-import utils.AutoSave;
 import utils.ChooserUtils;
 import utils.DialogUtils;
 
@@ -43,30 +42,24 @@ public class MainFrame extends Frame {
 	/* MenuBar */
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu fileMenu = new JMenu("File");
-	private JMenu mapMenu = new JMenu("Map");
 	private JMenu viewMenu = new JMenu("View");
 	private JMenu soundMenu = new JMenu("Sound");
 	private JMenu gamePadMenu = new JMenu("Gamepad");
 	
 	/* fileMenu items */
-	private JMenuItem file_open = new JMenuItem("Open Image");
-	/* mapMenu items */
-	private JMenuItem map_new = new JMenuItem("New Map");
-	private JMenuItem map_load = new JMenuItem("Load Map");
-	private JMenuItem map_save = new JMenuItem("Save Map");
-	private JMenuItem map_change = new JMenuItem("Change Map");
-	private JMenuItem map_show = new JMenuItem("Show Map");
+	private JMenuItem file_openImage = new JMenuItem("Open Image");
+	private JMenuItem file_openMap = new JMenuItem("Open Map");
 	/* viewMenu items */
-	private JMenuItem view_fullScreen = new JMenuItem("Full Screen");
 	private JCheckBoxMenuItem view_autoPan = new JCheckBoxMenuItem("Auto Pan");
 	private JCheckBoxMenuItem view_skipVisited = new JCheckBoxMenuItem("Skip Visited Panoramas");
+	private JMenuItem view_showMap = new JMenuItem("Show Map");
+	private JMenuItem view_fullScreen = new JMenuItem("Full Screen");
 	/* soundMenu items */
 	private JMenuItem sound_playPause = new JMenuItem("Play");
 	private JMenuItem sound_stop = new JMenuItem("Stop");
 	/* gamePadMenu items */
 	private JMenuItem gamePad_scan = new JMenuItem("Scan");
 	/* map gui */
-	private static MapDrawFrame mapEditor = new MapDrawFrame("Create Map");
 	private static MapViewFrame mapView = new MapViewFrame("View Map");
 	
 	
@@ -112,8 +105,6 @@ public class MainFrame extends Frame {
             	running = false;
             	// Disposing mapView frame
             	mapView.cleanUp();
-            	// Disposing mapEditor frame
-            	mapEditor.cleanUp();
             	// Disposing self
                 cleanUp();
             }
@@ -127,19 +118,14 @@ public class MainFrame extends Frame {
 	
 	private void createMenuBar() {
 		// FILE
-		fileMenu.add(file_open);
-		
-		// MAP
-		mapMenu.add(map_new);
-		mapMenu.add(map_load);
-		mapMenu.add(map_save);
-		mapMenu.addSeparator();
-		mapMenu.add(map_change);
-		mapMenu.add(map_show);
+		fileMenu.add(file_openImage);
+		fileMenu.add(file_openMap);
 		
 		// VIEW
 		viewMenu.add(view_autoPan);
 		viewMenu.add(view_skipVisited);
+		viewMenu.addSeparator();
+		viewMenu.add(view_showMap);
 		viewMenu.addSeparator();
 		viewMenu.add(view_fullScreen);
 		
@@ -157,7 +143,6 @@ public class MainFrame extends Frame {
 		gamePadMenu.addSeparator();
 		
 		menuBar.add(fileMenu);
-		menuBar.add(mapMenu);
 		menuBar.add(viewMenu);
 		menuBar.add(soundMenu);
 		menuBar.add(gamePadMenu);
@@ -165,22 +150,13 @@ public class MainFrame extends Frame {
 		setJMenuBar(menuBar);
 		
 		/* Item listeners */
-		file_open.addActionListener(new ActionListener() {
+		file_openImage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) { openImage(); }
-		});		
-		map_new.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) { newMap(); }			
-		});		
-		map_load.addActionListener(new ActionListener() {
+		});	
+		file_openMap.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) { loadMap(); }
-		});		
-		map_save.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) { saveMap(); }
-		});		
-		map_change.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) { changeMap(); }
 		});
-		map_show.addActionListener(new ActionListener() {
+		view_showMap.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) { showMap(); }
 		});	
 		view_fullScreen.addActionListener(new ActionListener() {
@@ -207,10 +183,6 @@ public class MainFrame extends Frame {
 		return running;
 	}
 	
-	public MapDrawFrame getMapDrawingFrame() {
-		return mapEditor;
-	}
-	
 	public MapViewFrame getMapViewFrame() {
 		return mapView;
 	}
@@ -228,13 +200,12 @@ public class MainFrame extends Frame {
 		if(imagePath == null) return;
 		
 		// Set new map flag
-		AutoSave.resetSavingPath();
 		PanGraph.removeMap();
 		
 		// Add to new map
 		int spawnX, spawnY;
-		spawnX = mapEditor.getMapPanel().getOriginX();
-		spawnY = mapEditor.getMapPanel().getOriginY();
+		spawnX = mapView.getMapPanel().getOriginX();
+		spawnY = mapView.getMapPanel().getOriginY();
 		PanGraph.addNode(imagePath, spawnX, spawnY);
 		PanGraph.setName(PanGraph.DEFAULT_NAME);
 		
@@ -243,47 +214,13 @@ public class MainFrame extends Frame {
 		TourManager.prepare(PanGraph.getHome());
 	}
 	
-	private void newMap() {
-		// No map loaded
-		if(PanGraph.isEmpty()) {
-			AutoSave.resetSavingPath();
-			// Open new frame
-			PanGraph.setName(PanGraph.DEFAULT_NAME);
-			mapEditor.showFrame();
-		}
-		// Map loaded, prompt overwrite
-		else {
-			int dialogRes = DialogUtils.showConfirmDialog("Creating new map will discard existing one, \nDo you want to continue?", "New Map");
-			if(dialogRes == DialogUtils.YES) {
-				AutoSave.resetSavingPath();
-				// Remove map if loaded
-				PanGraph.removeMap();
-				// Open new frame
-				mapEditor.showFrame();
-			}
-			else {
-				return;
-			}
-		}
-	}
-	
 	private void loadMap() {
-		boolean success = mapEditor.load();
+		boolean success = mapView.load();
 		
 		if(success) {
 			Scene.queuePanorama(PanGraph.getHome());
 			TourManager.prepare(PanGraph.getHome());
 		}
-	}
-	
-	private void saveMap() {
-		mapEditor.save();
-	}
-	
-	private void changeMap() {
-		if(PanGraph.isEmpty()) return;
-		
-		mapEditor.showFrame();
 	}
 	
 	private void showMap() {
