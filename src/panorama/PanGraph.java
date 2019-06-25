@@ -56,16 +56,21 @@ public class PanGraph {
 	}
 	
 	public static boolean loadMap(String loadPath) {
+		PanNode gHead, gHome;
+		int gNodeCount;
+		PanGraphSize gSize;
+		TourPath gTour;
+		
 		try {
 			FileInputStream fin = new FileInputStream(loadPath);
 			ObjectInputStream ois = new ObjectInputStream(fin);
-			head = (PanNode) ois.readObject();
-			home = (PanNode) ois.readObject();
+			gHead = (PanNode) ois.readObject();
+			gHome = (PanNode) ois.readObject();
 			name = (String) ois.readObject();
-			nodeCount = (int) ois.readObject();
+			gNodeCount = (int) ois.readObject();
 			
-			size = (PanGraphSize) ois.readObject();
-			tour = (TourPath) ois.readObject();
+			gSize = (PanGraphSize) ois.readObject();
+			gTour = (TourPath) ois.readObject();
 			
 			ois.close();
 		} catch (Exception e) {
@@ -74,33 +79,94 @@ public class PanGraph {
 		}
 		
 		// path checking
-		PanNode start = head;
+		PanNode start = gHead;
+		
+		// Path to the last manually loaded image/audio file
+		String lastImageLoc = null;
+		String lastAudioLoc = null;
+		
+		// Path to the map images directory
+		int mapNameIndex = loadPath.lastIndexOf("\\");
+		String mapImagesLoc = loadPath.substring(0, mapNameIndex + 1);
+		
 		while(start != null) {
 			File imageFile, audioFile;
 			
 			imageFile = new File(start.getPanoramaPath());
 			audioFile = (start.hasAudio()) ? new File(start.getAudioPath()) : null;
 
+			// Image Not Found
 			if(!imageFile.exists()) {
-				boolean replace = DialogUtils.replacePathDialog(imageFile.getPath());
-				if(!replace) return false;
+				// get image name
+				String imageName = start.getMapNode().panName;
 				
-				// user requested replacement -> open image dialog 
-				String newPanoramaPath = ChooserUtils.openImageDialog();
-				if(newPanoramaPath != null) 
+				// creating path: mapLocation\Images\imageName
+				File imageFile1 = new File(mapImagesLoc.concat("\\Images\\").concat(imageName));
+				
+				// creating path: lastImageLocation\imageName
+				File imageFile2 = null ;
+				if(lastImageLoc != null) {
+					int nameIndex = lastImageLoc.lastIndexOf("\\");
+					imageFile2 = new File(lastImageLoc.substring(0, nameIndex + 1).concat(imageName));
+				}
+				
+				String newPanoramaPath;
+				if(imageFile1.exists()) {
+					newPanoramaPath = imageFile1.getPath();
+				}
+				else if(imageFile2 != null && imageFile2.exists()) {
+					newPanoramaPath = imageFile2.getPath();
+				}
+				else {
+					// request replacement
+					boolean replace = DialogUtils.replacePathDialog(imageFile.getPath());
+					if(!replace) return false;
+					
+					// user requested replacement -> open image dialog 
+					newPanoramaPath = lastImageLoc = ChooserUtils.openImageDialog();
+				}
+				
+				if(newPanoramaPath != null) {
 					start.setPanoramaPath(newPanoramaPath);
+				}
 			}
+			// Audio Not Found
 			else if(audioFile != null && !audioFile.exists()) {
-				boolean replace = DialogUtils.replacePathDialog(audioFile.getPath());
-				if(!replace) return false;
+				// get audio name
+				String audioName = start.getMapNode().audioName;
 				
-				// user requested replacement -> open audio dialog 
-				String newAudioPath = ChooserUtils.openAudioDialog();
-				if(newAudioPath != null) 
+				// creating path: mapLocation\Audio\audioName
+				File audioFile1 = new File(mapImagesLoc.concat("\\Audio\\").concat(audioName));
+				
+				// creating path: lastAudioLocation\audioName
+				File audioFile2 = null ;
+				if(lastAudioLoc != null) {
+					int nameIndex = lastAudioLoc.lastIndexOf("\\");
+					audioFile2 = new File(lastAudioLoc.substring(0, nameIndex + 1).concat(audioName));
+				}
+				
+				String newAudioPath;
+				if(audioFile1.exists()) {
+					newAudioPath = audioFile1.getPath();
+				}
+				else if(audioFile2 != null && audioFile2.exists()) {
+					newAudioPath = audioFile2.getPath();
+				}
+				else {
+					boolean replace = DialogUtils.replacePathDialog(audioFile.getPath());
+					if(!replace) return false;
+					
+					// user requested replacement -> open audio dialog 
+					newAudioPath = lastAudioLoc = ChooserUtils.openAudioDialog();
+				}
+				
+				if(newAudioPath != null) {
 					start.setAudioPath(newAudioPath);
+				}
 			}
+			// Everything is OK
 			else {
-				start = start.getNext();
+				start = start.getNext();	
 			}
 		}
 		
@@ -108,9 +174,16 @@ public class PanGraph {
 		AutoLoad.setLastUsedMap(loadPath);
 		
 		// success
+		head = gHead;
+		home = gHome;
+		name = loadPath;
+		nodeCount = gNodeCount;
+		size = gSize;
+		tour = gTour;
+		
 		return true;
 	}
-
+	
 	public static void setTextMode(boolean b) {
 		textMode = b;
 	}
