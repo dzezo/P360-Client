@@ -143,6 +143,11 @@ public class InputManager {
 				case K_MAP:
 					GuiNavButtons.navMap.performAction();
 					break;
+				case K_LEFT:
+				case K_RIGHT:
+				case K_UP:
+				case K_DOWN:
+					break;
 				default:
 					if(DisplayManager.isFullscreen()) DisplayManager.setWindowed();
 					break;
