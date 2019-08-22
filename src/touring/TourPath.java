@@ -15,6 +15,11 @@ public class TourPath implements Serializable {
 	private List<Waypoint> list1 = new LinkedList<Waypoint>();
 	private List<Waypoint> list2 = new LinkedList<Waypoint>();
 	
+	/**
+	 * Dodaje putokaz na kraj liste putokaza
+	 * @param wp - putokaz koji se dodaje
+	 * @return redni broj lokacije na koju je dodan putokaz
+	 */
 	public int add(Waypoint wp) {
 		List<Waypoint> path;
 		
@@ -26,6 +31,40 @@ public class TourPath implements Serializable {
 		path.add(wp);
 		
 		return path.size();
+	}
+	
+	/**
+	 * Dodaje putokaz na kraj liste putokaza ukoliko ne postoji takav putokaz 
+	 * @param wp - putokaz koji se dodaje
+	 * @return false - ukoliko vec postoji takav putokaz
+	 */
+	public boolean addWithCheck(Waypoint wp) {
+		List<Waypoint> path;
+		
+		if(list2.isEmpty())
+			path = list1;
+		else
+			path = list2;
+		
+		// Slucaj kada je prazna lista putokaza
+		if(path.size() == 0) {
+			path.add(wp);
+			return true;
+		}
+		
+		Iterator<Waypoint> iterator = path.iterator();
+		while(iterator.hasNext()) {
+			Waypoint waypoint = iterator.next();
+			
+			// Slucaj kada isti putokaz vec postoji
+			if(waypoint.equals(wp)) {
+				return false;
+			}
+		}
+		
+		// dodaje putokaz na kraj liste
+		path.add(wp);
+		return true;
 	}
 	
 	public int remove(Waypoint waypointToRemove) {
@@ -111,23 +150,46 @@ public class TourPath implements Serializable {
 	}
 	
 	public void updateTourNumbers() {
-		List<Waypoint> path;
-		if(list2.isEmpty())
-			path = list1;
-		else
-			path = list2;
+		// Nothing to update
+		if(list1.isEmpty() && list2.isEmpty()) 
+			return;
 		
-		int newIndex = 1;
+		List<Waypoint> path;
+		List<Waypoint> visited;
+		
+		if(list2.isEmpty()) {
+			path = list1;
+			visited = list2;
+		}
+		else {
+			path = list2;
+			visited = list1;
+		}
+		
+		int pathIndex = 1;
+		Waypoint currWaypoint = path.get(0);
 		
 		Iterator<Waypoint> iterator = path.iterator();
 		while(iterator.hasNext()) {
 			Waypoint nextWaypoint = iterator.next();
 			
-			nextWaypoint.node.tourNum.add(newIndex++);
-			
-			// On last waypoint add final tourNum
-			if(!iterator.hasNext()) nextWaypoint.next.tourNum.add(newIndex);
+			if(currWaypoint.next.equals(nextWaypoint.node)) {
+				currWaypoint.node.tourNum.add(pathIndex++);
+				
+				visited.add(currWaypoint);
+				path.remove(currWaypoint);
+				
+				currWaypoint = nextWaypoint;
+				
+				iterator = path.iterator();
+			}
 		}
+		
+		currWaypoint.node.tourNum.add(pathIndex++);
+		currWaypoint.next.tourNum.add(pathIndex);
+		
+		visited.addAll(path);
+		path.clear();
 	}
 	
 	public void printPath() {
