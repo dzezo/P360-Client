@@ -17,12 +17,11 @@ public class ChooserUtils {
 				return true;
 			String fileName = file.getName();
 			fileName = fileName.toLowerCase();
-			return (fileName.endsWith(".jpg") 
-					|| fileName.endsWith(".tif"))
-					|| fileName.endsWith(".pimg");
+			return (fileName.endsWith(".jpg")
+					|| fileName.endsWith(".pimg"));
 		}
 		public String getDescription() {
-			return "*.jpg, *.tif, *.pimg";
+			return "*.jpg, *.pimg";
 		}
 	};
 	private static FileFilter ff_map = new FileFilter() {

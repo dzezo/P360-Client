@@ -2,8 +2,9 @@ package panorama;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class PanGraphSize implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	protected int NORTH;
 	protected int SOUTH;
 	protected int WEST;

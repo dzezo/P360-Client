@@ -3,6 +3,7 @@ package gui;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 import glRenderer.DisplayManager;
 import utils.Loader;
@@ -76,5 +77,21 @@ public abstract class GuiButton implements IButton {
 	
 	public void performAction() {
 		onClick(this);
+	}
+	
+	/**
+	 * Sets gui button positon on xy plane
+	 * @param pos - x,y position of gui element, can range from -1 to +1
+	 */
+	public void setPosition(Vector2f pos) {
+		guiTexture.setPosition(pos);
+	}
+	
+	/**
+	 * Sets gui button rotation on xy plane
+	 * @param rot - rotation is in degrees
+	 */
+	public void setRotation(Vector3f rot) {
+		guiTexture.setRotation(rot);
 	}
 }

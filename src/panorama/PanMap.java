@@ -10,19 +10,20 @@ import java.util.Iterator;
 
 import frames.MapViewPanel;
 
-@SuppressWarnings("serial")
 public class PanMap extends Rectangle {
+	private static final long serialVersionUID = 1L;
+	
 	/* Dimensions */
 	public static final int WIDTH = MapViewPanel.getNodeSize() * 16;
 	public static final int HEIGHT = MapViewPanel.getNodeSize() * 8;
 	public static final float BORDER_SIZE = 2.0f;
 	public static final float CONNECTION_SIZE = 1.5f;
-
+	
 	private PanNode parent;
 	
 	protected String panName;
 	protected String audioName;
-	protected transient PanMapIcon icon;
+	protected PanMapIcon icon;
 	
 	/* Fonts */
 	private static Font panNameFont = new Font("Arial", Font.BOLD, 15);
@@ -267,6 +268,9 @@ public class PanMap extends Rectangle {
 		if(icon == null) {
 			icon = new PanMapIcon(this);
 		}
+		else if(!icon.isLoaded())
+			icon.reloadIcon();
+		
 		// draw icon/text
 		if(PanGraph.isTextMode() || !icon.isLoaded()) {
 			drawText(g);

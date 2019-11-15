@@ -72,7 +72,16 @@ public class PanGraph {
 			gSize = (PanGraphSize) ois.readObject();
 			gTour = (TourPath) ois.readObject();
 			
+			PanNode node = gHead;
+			while(node != null) {
+				byte[] iconData = (byte[]) ois.readObject();
+				node.getMapNode().icon.init(iconData);
+				node = node.getNext();
+			}
+			
+			
 			ois.close();
+			fin.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

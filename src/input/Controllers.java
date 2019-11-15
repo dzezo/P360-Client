@@ -38,8 +38,11 @@ public class Controllers {
 			net.java.games.input.Controller[] found = directEnv.getControllers();
 			ArrayList<net.java.games.input.Controller> lollers = new ArrayList<net.java.games.input.Controller>();
 			for ( net.java.games.input.Controller c : found ) {
-				if ( (!c.getType().equals(net.java.games.input.Controller.Type.KEYBOARD)) && 
-						(!c.getType().equals(net.java.games.input.Controller.Type.MOUSE)) ) {
+				if ( 
+						c.getType().equals(net.java.games.input.Controller.Type.STICK) || 
+						c.getType().equals(net.java.games.input.Controller.Type.GAMEPAD)
+			       ) 
+				{
 					lollers.add(c);
 				}
 			}

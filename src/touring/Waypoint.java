@@ -4,8 +4,9 @@ import java.io.Serializable;
 
 import panorama.PanNode;
 
-@SuppressWarnings("serial")
 public class Waypoint implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
 	protected PanNode node;
 	protected PanNode next;
 	

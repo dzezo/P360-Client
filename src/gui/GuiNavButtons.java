@@ -5,6 +5,7 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 import frames.MainFrame;
 import glRenderer.DisplayManager;
@@ -243,6 +244,7 @@ public class GuiNavButtons {
 	public static void update() {
 		currentTime = System.currentTimeMillis();
 		
+		// Display/Hide nav. btn.
 		if(isMouseNear()) {
 			showAll();
 		}
@@ -250,10 +252,45 @@ public class GuiNavButtons {
 			hideAll();
 		}
 		
+		// Calculating nav. btn. position based on current camera angle
+		float f_yaw = Scene.getCamera().getYaw();
+		double d_yaw = (double) f_yaw;
+		float posX,posY;
+		if(45 < d_yaw && d_yaw < 135) {
+			posX = -btnLocation;
+			posY = (float) (1/Math.tan(Math.toRadians(d_yaw)) * btnLocation);
+		}
+		else if (135 <= d_yaw && d_yaw <= 225) {
+			posX = (float) (Math.tan(Math.toRadians(d_yaw)) * btnLocation);
+			posY = -btnLocation;
+		}
+		else if(225 < d_yaw && d_yaw < 315) {
+			posX = btnLocation;
+			posY = (float) (-1/Math.tan(Math.toRadians(d_yaw)) * btnLocation);
+		}
+		else {
+			posX = (float) (-Math.tan(Math.toRadians(d_yaw)) * btnLocation);
+			posY = btnLocation;
+		}
+		
+		// Setting nav. btn. positon
+		navTop.setPosition(new Vector2f(posX, posY));
+		navBot.setPosition(new Vector2f(-posX, -posY));
+		navRight.setPosition(new Vector2f(posY, -posX));
+		navLeft.setPosition(new Vector2f(-posY, posX));
+		
+		// Setting nav. btn. rotation to match new position
+		navTop.setRotation(new Vector3f(0, 0, f_yaw));
+		navBot.setRotation(new Vector3f(0, 0, f_yaw));
+		navRight.setRotation(new Vector3f(0, 0, f_yaw));
+		navLeft.setRotation(new Vector3f(0, 0, f_yaw));
+		
+		// Detecting mouse events on nav. btn.
 		navTop.update();
 		navBot.update();
 		navRight.update();
 		navLeft.update();
 		navMap.update();
 	}
+	
 }

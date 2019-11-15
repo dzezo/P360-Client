@@ -13,19 +13,16 @@ public class StaticShader extends ShaderProgram {
 	
 	public StaticShader() {
 		super(VERTEX_FILE, FRAGMENT_FILE);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	protected void bindAttributes() {
-		// TODO Auto-generated method stub
 		super.bindAttribute(0, "position");
 		super.bindAttribute(1, "textureCoords");
 	}
 
 	@Override
 	protected void getAllUniformLocations() {
-		// TODO Auto-generated method stub
 		location_transformationMatrix = super.getUniformLocation("transformationMatrix");
 		location_projectionMatrix = super.getUniformLocation("projectionMatrix");
 		location_viewMatrix = super.getUniformLocation("viewMatrix");

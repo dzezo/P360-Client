@@ -8,8 +8,9 @@ import java.util.List;
 
 import panorama.PanNode;
 
-@SuppressWarnings("serial")
 public class TourPath implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	public static final int WAYPOINT_NOT_FOUND = -1;
 	
 	private List<Waypoint> list1 = new LinkedList<Waypoint>();

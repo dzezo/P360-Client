@@ -4,14 +4,14 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import panorama.Panorama;
+import static panorama.Panorama.*;
 import shaders.StaticShader;
 
 public class Renderer {
@@ -27,9 +27,9 @@ public class Renderer {
 	}
 	
 	public static void prepare() {
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		GL11.glClearColor(0, 0, 0, 1);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0, 0, 0, 1);
 	}
 	
 	public static void render(StaticShader shader) {
@@ -42,19 +42,19 @@ public class Renderer {
 			if(newProjection) newProjection = false;
 		}
 		
-		GL30.glBindVertexArray(Scene.getPanorama().getBody().getVaoID());
-		GL20.glEnableVertexAttribArray(0);
-		GL20.glEnableVertexAttribArray(1);
+		glBindVertexArray(Scene.getPanorama().getBody().getVaoID());
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
 		
 		shader.loadTransformationMatrix(createTransformationMatrix());
 		
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Scene.getPanorama().getTextureID());
-		GL11.glDrawElements(GL11.GL_TRIANGLE_STRIP, Scene.getPanorama().getBody().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Scene.getPanorama().getTextureID());
+		glDrawElements(GL_TRIANGLE_STRIP, Scene.getPanorama().getBody().getVertexCount(), GL_UNSIGNED_INT, 0);
 		
-		GL20.glDisableVertexAttribArray(0);
-		GL20.glDisableVertexAttribArray(1);
-		GL30.glBindVertexArray(0);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glBindVertexArray(0);
 		shader.stop();
 	}
 
@@ -84,7 +84,7 @@ public class Renderer {
 		// Camera
 		int panType = Scene.getPanorama().getType();
 		Scene.getCamera().setPitch(0);
-		if(panType == Panorama.TYPE_CYLINDRICAL)
+		if(panType == TYPE_CYLINDRICAL)
 			Scene.getCamera().setPitchLimit((vFOV_MAXIMUM - vFOV)/2);
 		else
 			Scene.getCamera().setPitchLimit(90);

@@ -67,8 +67,13 @@ public class Camera {
 
 	/* YAW CONTROL METHODS */
 	
+	/**
+	 * Returns camera yaw (horizontal angle)
+	 * @return yaw - in degrees
+	 */
 	public float getYaw() {
-		return yaw;
+		float mod = 360.0f;
+		return (this.yaw % mod + mod) % mod;
 	}
 	
 	public void setYaw(float yaw) {
@@ -86,7 +91,7 @@ public class Camera {
 	/* MOVEMENT METHODS */
 	
 	/**
-	 * Camera rotation velocity is via InputManger, when mouse drag occurs
+	 * Camera rotation velocity is set via InputManger, when mouse drag occurs
 	 */
 	public void setRotationVelocity(float yawVelocity, float pitchVelocity) {
 		this.yawVelocity = yawVelocity;

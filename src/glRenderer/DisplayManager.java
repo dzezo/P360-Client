@@ -10,7 +10,7 @@ import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
+import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -28,11 +28,12 @@ public class DisplayManager {
 	private static boolean toFullscreen = false;
 	
 	public static void createDisplay(Canvas canvas) {
-		ContextAttribs attribs = new ContextAttribs(3,2).withForwardCompatible(true).withProfileCore(true);
+		ContextAttribs attribs = new ContextAttribs(3,3).withForwardCompatible(true).withProfileCore(true);
 		
 		try{
 			Display.setParent(canvas);
 			Display.setTitle("P360");
+			Display.setVSyncEnabled(true);
 			Display.create(new PixelFormat(), attribs);
 		}
 		catch(LWJGLException e){
@@ -40,7 +41,7 @@ public class DisplayManager {
 		}
 		
 		// Where to render on display
-		GL11.glViewport(0, 0, WIDTH, HEIGHT);
+		glViewport(0, 0, WIDTH, HEIGHT);
 		
 		// Set cursor
 		try {
@@ -53,11 +54,11 @@ public class DisplayManager {
 	
 	public static void updateDisplay(){
 		if (Display.wasResized()) {
-			GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+			glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		}
 		
-		Display.sync(FPS_CAP);
 		Display.update();
+		Display.sync(FPS_CAP);
 	}
 	
 	public static void closeDisplay(){
@@ -84,7 +85,7 @@ public class DisplayManager {
 		// Recalculate projection matrix
 		Renderer.setNewProjection();
 		// Where to render on display
-		GL11.glViewport(0, 0, width, height);
+		glViewport(0, 0, width, height);
 		// Inform about resizing
 		resized = true;
 	}
@@ -102,7 +103,7 @@ public class DisplayManager {
 		// Recalculate projection matrix
 		Renderer.setNewProjection();
 		// Where to render on display
-		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
+		glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		// Inform about resizing
 		resized = true;
 	}

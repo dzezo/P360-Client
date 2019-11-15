@@ -8,7 +8,8 @@ public class Scene {
 	private static PanNode activePanorama;
 	private static PanNode queuedPanorama;
 	private static Camera camera;
-	private static boolean ready;
+	private static boolean ready = false;
+	private static boolean refreshScene = false;
 	
 	public static void loadNewImage(PanNode newImage) {
 		// reset ready flag
@@ -78,6 +79,48 @@ public class Scene {
 	/**
 	 * Interfejs za navigaciju dugmicima
 	 */
+	
+	/**
+	 * Skace na odabranu susednu panoramu.
+	 * Strana na koju korisnik zapravo zeli da skoci se odredjuje na osnovu pozicije kamere i selektovane strane.
+	 * @param selectedSide - strana na koju korisnik zeli da skoci (0-3)
+	 * <br><b>0</b> - gore
+	 * <br><b>1</b> - desno
+	 * <br><b>2</b> - dole
+	 * <br><b>3</b> - levo
+	 */
+	public static void goSide(int selectedSide) {
+		int numOfSides = 4;
+		int actualSide = 4;
+		float camAngle = camera.getYaw();
+		float refAngle = 315.0f;
+		
+		while(!(camAngle>refAngle) && refAngle>0) {
+			actualSide--;
+			refAngle -= 90;
+		}
+		
+		actualSide = (selectedSide + actualSide) % numOfSides;
+		
+		switch(actualSide) {
+		case 0:
+			goTop();
+			break;
+		case 1:
+			goRight();
+			break;
+		case 2:
+			goBot();
+			break;
+		case 3:
+			goLeft();
+			break;
+		default:
+			break;
+		}
+		
+	}
+	
 	public static void goLeft() {
 		if(activePanorama.getLeft() !=null) {
 			queuePanorama(activePanorama.getLeft());
@@ -111,6 +154,22 @@ public class Scene {
 		
 		activePanorama.loadPanorama();
 		Renderer.setNewProjection();
+	}
+	
+	public static boolean changeRequested() {
+		if(refreshScene) {
+			GuiNavButtons.setAvailableNavButtons(activePanorama);
+			refreshScene = false;
+		}
+		
+		return activePanorama != queuedPanorama;
+	}
+	
+	public static void refreshScene(PanNode panorama) {
+		if(activePanorama == panorama)
+			refreshScene = true;
+		else
+			queuePanorama(panorama);
 	}
 	
 }

@@ -19,13 +19,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
-import org.lwjgl.LWJGLException;
-
 import glRenderer.AudioManager;
 import glRenderer.DisplayManager;
 import glRenderer.Scene;
-import input.Controller;
-import input.Controllers;
+import input.ControllerScanner;
 import input.InputManager;
 import panorama.PanGraph;
 import panorama.PanNode;
@@ -59,6 +56,7 @@ public class MainFrame extends Frame {
 	private JMenuItem sound_stop = new JMenuItem("Stop");
 	/* gamePadMenu items */
 	private JMenuItem gamePad_scan = new JMenuItem("Scan");
+	private ControllerScanner controllerScanner = new ControllerScanner(gamePadMenu);
 	/* map gui */
 	private static MapViewFrame mapView = new MapViewFrame("View Map");
 	
@@ -72,6 +70,9 @@ public class MainFrame extends Frame {
 		// init audio manager
 		ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 		executor.scheduleAtFixedRate(new AudioManager(this), 0, 50, TimeUnit.MILLISECONDS);
+		
+		// start ControllerScanner service
+		controllerScanner.start();
 		
 		// create openGL display
 		DisplayManager.createDisplay(displayCanvas);
@@ -101,6 +102,8 @@ public class MainFrame extends Frame {
 		this.addWindowListener(new WindowAdapter() 
 		{
             public void windowClosing(WindowEvent we){
+            	// Stop ControllerScanner service
+            	controllerScanner.doStop();
             	// Break main loop
             	running = false;
             	// Disposing mapView frame
@@ -266,38 +269,7 @@ public class MainFrame extends Frame {
 	}
 	
 	private void scanForController() {
-		// Clear dropdown menu
-		for(int i=gamePadMenu.getItemCount()-1; i>1; i--)
-			gamePadMenu.remove(i);
-		// Rescan hardware
-		try {
-			Controllers.destroy();
-			Controllers.create();
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-		}
-		// Add controllers to menu
-		for(int i=0; i<Controllers.getControllerCount(); i++) {
-			String controllerName = Controllers.getController(i).getName();
-			JMenuItem controller = new JMenuItem(controllerName);
-			controller.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					// Get name of selected controller and compare it to all available controllers
-					String selectedControllerName = controller.getText();
-					for(int i=0; i<Controllers.getControllerCount(); i++) {
-						Controller c = Controllers.getController(i);
-						if(selectedControllerName.equals(c.getName())) {
-							InputManager.setController(c);
-							break;
-						}
-					}
-				}
-				
-			});
-			gamePadMenu.add(controller);
-		}
+		controllerScanner.requestScan();
 	}
 
 	/* Audio control */

@@ -6,8 +6,9 @@ import java.util.List;
 
 import glRenderer.Scene;
 
-@SuppressWarnings("serial")
 public class PanNode implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	// id cvora
 	private int ID = Integer.MAX_VALUE;
 	

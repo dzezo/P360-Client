@@ -12,8 +12,9 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import utils.DialogUtils;
 
-@SuppressWarnings("serial")
 public class PanAudio implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private File audioFile;
 	
 	private transient AudioInputStream audioInput;
