@@ -1,7 +1,5 @@
 package gui;
 
-import java.util.List;
-
 import org.lwjgl.util.vector.Vector2f;
 
 import utils.Loader;
@@ -14,16 +12,24 @@ public abstract class GuiSprite implements ISprite {
 		guiTexture = new GuiTexture(Loader.loadTexture(texturePath), position, scale);
 	}
 	
-	public void show(List<GuiTexture> list) {
+	public void show() {
 		if(isHidden) {
-			list.add(guiTexture);
+			GuiRenderer.getGuiList().add(guiTexture);
 			isHidden = false;
 		}
 	}
+	
+	public void setPositon(Vector2f position) {
+		guiTexture.setPosition(position);
+	}
+	
+	public void setScale(Vector2f scale) {
+		guiTexture.setScale(scale);
+	}
 
-	public void hide(List<GuiTexture> list) {
+	public void hide() {
 		if(!isHidden) {
-			list.remove(guiTexture);
+			GuiRenderer.getGuiList().remove(guiTexture);
 			isHidden = true;
 		}
 	}

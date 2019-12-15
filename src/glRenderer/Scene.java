@@ -23,7 +23,7 @@ public class Scene {
 	}
 	
 	public static void unloadActivePanorama() {
-		if(activePanorama != null)
+		if(activePanorama != null) 
 			activePanorama.unloadPanorama();
 	}
 	
