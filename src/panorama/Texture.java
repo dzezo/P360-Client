@@ -3,40 +3,38 @@ package panorama;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 
+import loaders.ImageLoader;
 import utils.BuffUtils;
-import utils.ImageData;
-import utils.ImageLoader;
-
 public class Texture {
-	protected int textureID;
+	protected static final int partsCount = 2;
+	
+	protected int[] textureID = new int[partsCount];
 	protected int width, height;
 	
 	public Texture() {
-		ImageData img = ImageLoader.getImageData();
+		width = ImageLoader.getInstance().getImage().getWidth();
+		height = ImageLoader.getInstance().getImage().getHeight();
 		
-		width = img.getWidth();
-		height = img.getHeight();
+		int texW = width / partsCount;
+		int texH = height;
+		for(int i = 0; i < partsCount; i++) {
+			textureID[i] = glGenTextures();
+			glBindTexture(GL_TEXTURE_2D, textureID[i]);
+			
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texW, texH, 0, GL_BGRA, GL_UNSIGNED_BYTE, 
+					BuffUtils.storeInIntBuffer(ImageLoader.getInstance().getImageData(i, 0, partsCount, 1)));
+			
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 		
-		textureID = glGenTextures();
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 
-				BuffUtils.storeInIntBuffer(img.getPixels()));
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-		
-		ImageLoader.clearImageData();
-	}
-
-	public int getTextureID() {
-		return textureID;
+		ImageLoader.getInstance().clearImage();
 	}
 
 	public int getWidth() {

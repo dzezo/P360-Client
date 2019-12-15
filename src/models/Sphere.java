@@ -1,77 +1,91 @@
 package models;
 
+import static org.lwjgl.opengl.GL11.*;
 import utils.Loader;
 
-/*
- * Sphere
- * Iscrtavanje: TRIANGLE_STRIP
- * coordCount: broj jedinstvenih tacaka
- * vertexCount: broj tacaka
- * Ovo postoji zato sto se u svakoj iteraciji prave dve tacke gornja i donja, 
- * sto znaci da je gornja tacka u sledecoj iteraciji vec generisana.
- * Resenje:
- * 		newVertexIndex: pracenje indeksa novih tacaka
- * 		oldVertexIndex: pracenje indeksa tacka iz prethodnog reda
- */
-
 public class Sphere extends Body {
+	private static final int primitiveType = GL_TRIANGLES;
+	private static final int sectorCount = 180;
+	private static final int stackCount = 90;
+	private static final int coordCount = (sectorCount + 1) * (stackCount + 1);
+	private static final int indicesCount = 6*sectorCount*(stackCount - 1);
 	
-	private static final float angleStep = 2.0f; // Must be divisible with 360
-	private static final int coordCount = (int) ((360/angleStep + 1) * (180/angleStep + 1));
-	
-	public Sphere(int width) {
-		vertexCount = 2*coordCount;
-		radius = (float) (width/(2*Math.PI));
+	public Sphere(int width, int sliceX, int slicesX, int textureID) {
+		radius = (float) (width / (2 * Math.PI));
 		
 		posCoords = new float[coordCount*3];
 		texCoords = new float[coordCount*2];
-		indices = new int[vertexCount];
+		indices = new int[indicesCount];
 		
-		int vertexCounter = 0;
-		// indices array
-		int newVertexIndex = 0;
-		int oldVertexIndex = 1;
+		double sliceXSize = 2.0 * Math.PI / slicesX;
+		double sliceXOffset = sliceXSize * sliceX;
 		
-		float phi, theta;
-		float x, y, z;
-		float s,t;
-		float tStep = angleStep/180;
-		float sStep = angleStep/360;
+		double stackStep = Math.PI / stackCount;
+		double sectorStep = sliceXSize / sectorCount;
+		double stackAngle, sectorAngle;
 		
-		for (phi = 0, t = 0; phi < 180; phi += angleStep, t += tStep) {
-			for (theta = 360, s = 0; theta >= 0; theta -= angleStep, s += sStep) {
-				if(phi == 0) {
-					z = (float) (Math.sin(phi / 180 * Math.PI)*Math.cos(theta / 180 * Math.PI));
-					x = (float) (Math.sin(phi / 180 * Math.PI)*Math.sin(theta / 180 * Math.PI));
-					y = (float) Math.cos(phi / 180 * Math.PI);
-					
-					posCoords[3*newVertexIndex] = x*radius;
-					posCoords[3*newVertexIndex + 1] = y*radius;
-					posCoords[3*newVertexIndex + 2] = z*radius;
-					texCoords[2*newVertexIndex] = s;
-					texCoords[2*newVertexIndex + 1] = t;
-					indices[vertexCounter++] = newVertexIndex++;
-				}
-				else if (phi == angleStep && theta > 0) {
-					indices[vertexCounter++] = oldVertexIndex;
-					oldVertexIndex += 2;
-				}
-				else
-					indices[vertexCounter++] = oldVertexIndex++;
+		float x, y, z, zx;
+		float s, t;
+		
+		int k = 0;
+		
+		for(int i = 0; i <= stackCount; i++) {
+			stackAngle = Math.PI / 2 - i * stackStep;
+			zx = (float) (radius * Math.cos(stackAngle));
+			y = (float) (radius * Math.sin(stackAngle));
+			
+			for(int j = 0; j <= sectorCount; j++, k++) {
+				sectorAngle = j * sectorStep + sliceXOffset;
 				
-				z = (float) (Math.sin((phi+angleStep) / 180 * Math.PI)*Math.cos(theta / 180 * Math.PI));
-				x = (float) (Math.sin((phi+angleStep) / 180 * Math.PI)*Math.sin(theta / 180 * Math.PI));
-				y = (float) Math.cos((phi+angleStep) / 180 * Math.PI);
+				x = (float) (zx * Math.cos(sectorAngle));
+				z = (float) (zx * Math.sin(sectorAngle));
+				posCoords[3*k] = x;
+				posCoords[3*k+1] = y;
+				posCoords[3*k+2] = z;
 				
-				posCoords[3*newVertexIndex] = x*radius;
-				posCoords[3*newVertexIndex + 1] = y*radius;
-				posCoords[3*newVertexIndex + 2] = z*radius;
-				texCoords[2*newVertexIndex] = s;
-				texCoords[2*newVertexIndex + 1] = t + tStep;		
-				indices[vertexCounter++] = newVertexIndex++;
+				s = (float) j / sectorCount;
+				t = (float) i / stackCount;	
+				texCoords[2*k] = s;
+				texCoords[2*k+1] = t;
 			}
 		}
 		
-		vaoID = Loader.loadToVAO(posCoords, texCoords, indices);
+		generateIndices();
+		
+		vaoID = Loader.loadToVAO(posCoords, texCoords, indices, vbosID);
+		texID = textureID;
 	}
+	
+	private void generateIndices() {
+		int k1, k2;
+		int k = 0;
+		
+		for(int i = 0; i < stackCount; i++) {
+			
+			k1 = i * (sectorCount + 1);
+			k2 = k1 + (sectorCount + 1);
+			
+			for(int j = 0; j < sectorCount; j++, k1++, k2++) {
+				if(i != 0) {
+					indices[k++] = k1;
+					indices[k++] = k2;
+					indices[k++] = k1 + 1;
+				}
+				if(i != (stackCount - 1)) {
+					indices[k++] = k1 + 1;
+					indices[k++] = k2;
+					indices[k++] = k2 + 1;
+				}
+			}
+		}
+	}
+	
+	public int getPrimitiveType() {
+		return primitiveType;
+	}
+
+	public int getType() {
+		return TYPE_SPHERICAL;
+	}
+	
 }

@@ -3,10 +3,11 @@ package glRenderer;
 import org.lwjgl.util.vector.Vector3f;
 
 import input.InputManager;
+import utils.ConfigData;
 
 public class Camera {
 	// Camera world position
-	private Vector3f position = new Vector3f(0,0,0);
+	private Vector3f position = new Vector3f(0, 0, 0);
 	
 	// Camera angles
 	private float pitch;
@@ -25,7 +26,6 @@ public class Camera {
 	private boolean autoPanning = false;
 	
 	// AutoPan config
-	private boolean autoPanEnabled = true;
 	private final float autoPanSpeed = 0.05f;
 	private	final float pitchDampingFactor = 0.005f; // range from 1 to 0
 	private final long autoPanLatency = 2500; // in milis
@@ -124,11 +124,11 @@ public class Camera {
 	public void autoPan() {
 		float pitch;
 		// Auto Pan can begin if not disabled
-		if (autoPanEnabled) {
+		if (ConfigData.getPanFlag()) {
 			long currentTime = System.currentTimeMillis();
 			
 			// Check if user has recently interacted
-			if(currentTime >= (InputManager.lastInteractTime + autoPanLatency)) {
+			if(currentTime >= (InputManager.getLastInteractTime() + autoPanLatency)) {
 				autoPanning = true;
 				
 				// Bring down camera pitch if it's not leveled
@@ -155,26 +155,10 @@ public class Camera {
 	}
 	
 	/**
-	 * Function that toggles auto pan on and off.
-	 * @returns current auto pan state
-	 */
-	public boolean setAutoPan() {
-		InputManager.lastInteractTime = 0;
-		
-		autoPanEnabled = !autoPanEnabled;
-
-		return autoPanEnabled;
-	}
-	
-	public boolean getAutoPan() {
-		return this.autoPanEnabled;
-	}
-	
-	/**
 	 * @returns true if camera is rotating by itself
 	 */
 	public boolean isAutoPanning() {
-		return (autoPanEnabled && autoPanning);
+		return (ConfigData.getPanFlag() && autoPanning);
 	}
 	
 	/**

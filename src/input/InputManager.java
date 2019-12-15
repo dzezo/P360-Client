@@ -4,11 +4,12 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 
-import frames.MainFrame;
+import frames.MapViewFrame;
 import frames.MapViewPanel;
 import glRenderer.DisplayManager;
 import glRenderer.Scene;
 import gui.GuiNavButtons;
+import utils.ConfigData;
 
 public class InputManager {
 	// Keyboard controls
@@ -43,9 +44,6 @@ public class InputManager {
 	public static final int GP_MAP = 4;			// L2
 	public static final int GP_MAP_CONFIRM = 5;	// R2
 	
-	// Requests
-	private static boolean fullscreenRequest = false;
-	
 	// Mouse movement config
 	private static Vector2f prevMouseDisplayPos = new Vector2f(0, 0);
 	private static Vector2f mouseDisplayPos = new Vector2f(0, 0);
@@ -63,7 +61,7 @@ public class InputManager {
 	private static final float pitchSpeed = 0.25f;
 	
 	// time of last interaction in milis
-	public static long lastInteractTime;
+	private static long lastInteractTime;
 	
 	public static void readInput() {
 		// Standard
@@ -86,14 +84,12 @@ public class InputManager {
 		}
 		
 		if(controller != null) {
-			if(!MainFrame.isMapVisible())
+			if(!MapViewFrame.getInstance().isVisible())
 				readControler();
 			else 
 				readControlerOnMap();
 		}
 		
-		// Other Input Requests
-		fullscreenRequest();
 	}
 	
 	public static void setController(ControllerItem ci) {
@@ -147,8 +143,8 @@ public class InputManager {
 				int key = Keyboard.getEventKey();
 				switch(key) {
 				case K_FSCREEN:
-					if(!DisplayManager.isFullscreen()) DisplayManager.setFullscreen();
-					else DisplayManager.setWindowed();
+					if(!DisplayManager.isFullscreen()) DisplayManager.requestFullScreen();
+					else DisplayManager.requestWindowed();
 					break;
 				case K_LPAN:
 					if(!GuiNavButtons.areHidden()) Scene.goSide(3);
@@ -167,7 +163,8 @@ public class InputManager {
 					else GuiNavButtons.showAll();
 					break;
 				case K_PAN:
-					Scene.getCamera().setAutoPan();
+					ConfigData.setPanFlag();
+					lastInteractTime ^= lastInteractTime;
 					break;
 				case K_MAP:
 					GuiNavButtons.navMap.performAction();
@@ -178,7 +175,7 @@ public class InputManager {
 				case K_DOWN:
 					break;
 				default:
-					if(DisplayManager.isFullscreen()) DisplayManager.setWindowed();
+					if(DisplayManager.isFullscreen()) DisplayManager.requestWindowed();
 					break;
 				}
 			}
@@ -186,51 +183,54 @@ public class InputManager {
 	}
 
 	private static void readMouse() {
-		// detect draging
-		if(Mouse.isButtonDown(0) && !GuiNavButtons.isMouseOver()) {
-			DisplayManager.showMouseCursor();
-			
-			float pitchDelta = Mouse.getDY() * mouseSensitivity;
-			float yawDelta = Mouse.getDX() * mouseSensitivity;
-			
-			Scene.getCamera().setRotationVelocity(yawDelta, pitchDelta);
-			
-			// Last time user interacted
-			lastInteractTime = System.currentTimeMillis();
+		while(Mouse.next()) {
+			if(Mouse.getEventButtonState()) {
+				// Left click
+				if(Mouse.getEventButton() == 0) {
+					// double click condition
+					if (click && clickTime + doubleClickLatency > System.currentTimeMillis()){
+						if(DisplayManager.isFullscreen())
+							DisplayManager.requestWindowed();
+						else
+							DisplayManager.requestFullScreen();
+						
+						// reset for next detection
+						click = false;
+					}
+					else {
+						click = true;
+						clickTime = System.currentTimeMillis();
+					}
+					
+					// detect if click happened on gui
+					if(!GuiNavButtons.areHidden())
+						GuiNavButtons.click();
+				}
+				else if (click && clickTime + doubleClickLatency < System.currentTimeMillis()) {
+					click = false;
+				}
+			} else {
+				if(Mouse.isButtonDown(0) && !GuiNavButtons.isMouseOver()) {
+					DisplayManager.showMouseCursor();
+					float pitchDelta = Mouse.getDY() * mouseSensitivity;
+					float yawDelta = Mouse.getDX() * mouseSensitivity;
+					
+					Scene.getCamera().setRotationVelocity(yawDelta, pitchDelta);
+					
+					// Last time user interacted
+					lastInteractTime = System.currentTimeMillis();
+				}
+			}
 		}
+		
 		// detect movement (if not draging)
-		else if(DisplayManager.isMouseInWindow()) {
+		if(DisplayManager.isMouseInWindow()) {
 			if(isMouseMoving()){
 				DisplayManager.showMouseCursor();
 			}
 			else if(isMouseIdling() && GuiNavButtons.areHidden()){
 				DisplayManager.hideMouseCursor();
 			}
-		}
-		
-		// detect left click
-		if(Mouse.next() && Mouse.getEventButtonState() && Mouse.isButtonDown(0)) {
-			// double click condition
-			if (click && clickTime + doubleClickLatency > System.currentTimeMillis()){
-				if(DisplayManager.isFullscreen())
-					DisplayManager.setWindowed();
-				else
-					DisplayManager.setFullscreen();
-				
-				// reset for next detection
-				click = false;
-			}
-			else {
-				click = true;
-				clickTime = System.currentTimeMillis();
-				
-				// detect if click happened on gui
-				if(!GuiNavButtons.areHidden())
-					GuiNavButtons.click();
-			}
-		}
-		else if (click && clickTime + doubleClickLatency < System.currentTimeMillis()) {
-			click = false;
 		}
 	}
 	
@@ -295,12 +295,13 @@ public class InputManager {
 				}
 				else if(controller.isButtonPressed(GP_FSCREEN)) {
 					if(DisplayManager.isFullscreen())
-						DisplayManager.setWindowed();
+						DisplayManager.requestWindowed();
 					else
-						DisplayManager.setFullscreen();
+						DisplayManager.requestFullScreen();
 				}
 				else if(controller.isButtonPressed(GP_PAN)) {
-					Scene.getCamera().setAutoPan();
+					ConfigData.setPanFlag();
+					lastInteractTime ^= lastInteractTime;
 				}
 				else if(controller.isButtonPressed(GP_MAP)) {
 					GuiNavButtons.navMap.performAction();
@@ -321,26 +322,26 @@ public class InputManager {
 		if(Controllers.next() && Controllers.getEventSource() == controller) {
 			if(Controllers.isEventButton() && Controllers.getEventButtonState()) {
 				if(controller.isButtonPressed(GP_LPAN)) {
-					MapViewPanel map = (MapViewPanel) MainFrame.getMap().getMapPanel();
+					MapViewPanel map = (MapViewPanel) MapViewFrame.getInstance().getMapPanel();
 					map.selectLeft();
 				}
 				else if(controller.isButtonPressed(GP_RPAN)) {
-					MapViewPanel map = (MapViewPanel) MainFrame.getMap().getMapPanel();
+					MapViewPanel map = (MapViewPanel) MapViewFrame.getInstance().getMapPanel();
 					map.selectRight();
 				}
 				else if(controller.isButtonPressed(GP_TPAN)) {
-					MapViewPanel map = (MapViewPanel) MainFrame.getMap().getMapPanel();
+					MapViewPanel map = (MapViewPanel) MapViewFrame.getInstance().getMapPanel();
 					map.selectTop();
 				}
 				else if(controller.isButtonPressed(GP_BPAN)) {
-					MapViewPanel map = (MapViewPanel) MainFrame.getMap().getMapPanel();
+					MapViewPanel map = (MapViewPanel) MapViewFrame.getInstance().getMapPanel();
 					map.selectBot();
 				}
 				else if(controller.isButtonPressed(GP_MAP)) {
-					MainFrame.getMap().hideFrame();
+					MapViewFrame.getInstance().hideFrame();
 				}
 				else if(controller.isButtonPressed(GP_MAP_CONFIRM)) {
-					MapViewPanel map = (MapViewPanel) MainFrame.getMap().getMapPanel();
+					MapViewPanel map = (MapViewPanel) MapViewFrame.getInstance().getMapPanel();
 					map.confirmSelection();
 				}
 			}
@@ -365,15 +366,12 @@ public class InputManager {
 		return System.currentTimeMillis() > lastMouseMoveTime + mouseHideLatency;
 	}
 	
-	private static void fullscreenRequest() {
-		if(fullscreenRequest) {
-			DisplayManager.setFullscreen();
-			
-			fullscreenRequest = false;
-		}
+	public static long getLastInteractTime() {
+		return lastInteractTime;
 	}
 	
-	public static void requestFullscreen() {
-		fullscreenRequest = true;
+	public static void setLastInteractTime(long time) {
+		lastInteractTime = time;
 	}
+
 }

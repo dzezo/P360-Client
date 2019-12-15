@@ -11,5 +11,9 @@
 	<classpathentry kind="lib" path="lib/jars/lwjgl_util.jar"/>
 	<classpathentry kind="lib" path="lib/jars/lwjgl.jar"/>
 	<classpathentry kind="lib" path="lib/jars/slick-util.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jna-5.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jna-platform-5.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/jars/vlcj-4.1.0.jar" sourcepath="lib/jars/vlcj-4.1.0-sources.jar"/>
+	<classpathentry kind="lib" path="lib/jars/vlcj-natives-4.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

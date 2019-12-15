@@ -11,19 +11,31 @@ import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
-import static panorama.Panorama.*;
+import models.Body;
+import static models.Body.*;
+
 import shaders.StaticShader;
 
 public class Renderer {
 	private static final float HFOV_CAP = 80f;
 	private static final float VFOV_CAP = 70f;
-	private static float NEAR_PLANE = 0.1f;
-	private static float FAR_PLANE = 5000f;
+	private static final float NEAR_PLANE = 0.1f;
+	private static final float FAR_PLANE = 500000f;
 	
-	private static boolean newProjection = false;
+	private static boolean projectionRequestFlag = false;
 	
-	public static void setNewProjection() {
-		newProjection = true;
+	public static void requestNewProjection() {
+		projectionRequestFlag = true;
+	}
+	
+	private static boolean newProjectionRequested() {
+		if(projectionRequestFlag) {
+			projectionRequestFlag = false;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	public static void prepare() {
@@ -35,32 +47,32 @@ public class Renderer {
 	public static void render(StaticShader shader) {
 		shader.start();
 		shader.loadViewMatrix(createViewMatrix());
-		if (DisplayManager.wasResized() || newProjection) {
+		if (DisplayManager.wasResized() || newProjectionRequested()) {
 			DisplayManager.confirmResize();
 			shader.loadProjectionMatrix(createProjectionMatrix());
-			// Request served
-			if(newProjection) newProjection = false;
 		}
-		
-		glBindVertexArray(Scene.getPanorama().getBody().getVaoID());
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		
 		shader.loadTransformationMatrix(createTransformationMatrix());
 		
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Scene.getPanorama().getTextureID());
-		glDrawElements(GL_TRIANGLE_STRIP, Scene.getPanorama().getBody().getVertexCount(), GL_UNSIGNED_INT, 0);
-		
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glBindVertexArray(0);
+		for(Body part : Scene.getPanorama().getParts()) {
+			glBindVertexArray(part.getVaoID());
+			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
+			
+			glBindTexture(GL_TEXTURE_2D, part.getTexID());
+			glDrawElements(part.getPrimitiveType(), part.getIndicesCount(), GL_UNSIGNED_INT, 0);
+			
+			glDisableVertexAttribArray(0);
+			glDisableVertexAttribArray(1);
+			glBindVertexArray(0);
+		}
+				
 		shader.stop();
 	}
 
 	private static Matrix4f createProjectionMatrix() {	
 		float height = (float) Scene.getPanorama().getHeight();
-		float radius = (float) Scene.getPanorama().getBody().getRadius();
+		float radius = (float) Scene.getPanorama().getRadius();
 		double angle = height/(2*radius);
 		
 		// Calculating aspect

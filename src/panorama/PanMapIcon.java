@@ -6,36 +6,26 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import utils.ImageCipher;
+import loaders.IconLoader;
 
 public class PanMapIcon implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	private transient ExecutorService iconLoaderThread;
 	
 	private PanMap parent;
 	
 	private transient ImageIcon icon;
 	private boolean isLoaded;
 	
-	private transient boolean reloadRequested = false;
+	private transient boolean loadRequested = false;
 	
 	public PanMapIcon(PanMap parent) {
 		this.parent = parent;
 		this.icon = null;
 		this.isLoaded = false;
-		
-		try {
-			loadIcon(parent.getParent().getPanoramaPath());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	public void drawIcon(Graphics2D g) {
@@ -46,69 +36,34 @@ public class PanMapIcon implements Serializable {
 		g.drawImage(icon.getImage(), dx1, dy1, dx2, dy2, 0, 0, icon.getIconWidth(), icon.getIconHeight(), null);
 	}
 	
-	public boolean isLoaded() {
-		return isLoaded;
-	}
-	
-	public void reloadIcon() {
-		synchronized(this) {
-			if(reloadRequested)
-				return;
-			
-			reloadRequested = true;
-		}
+	/**
+	 * Zahteva ucitavanje ikonice. Ukoliko je zahtev podnet izlazi odmah, 
+	 * u suprotnom dodaje objekat u red cekanja za ucitavanje
+	 */
+	public synchronized void loadIcon() {
+		if(loadRequested)
+			return;
 		
-		try {
-			loadIcon(parent.getParent().getPanoramaPath());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+		loadRequested = true;
+		IconLoader.getInstance().add(this);
 	}
 	
-	private void loadIcon(String iconPath) throws Exception {
-		iconLoaderThread = Executors.newFixedThreadPool(1);
-		iconLoaderThread.execute(() -> {
-			try {
-				// Load icon
-				Image image;
-				// image is .pimg
-				if(ImageCipher.isEncrypted(iconPath)) {
-					image = new ImageIcon(ImageCipher.imageDecrypt(iconPath)).getImage();
-				}
-				// image is not encrypted
-				else {
-					image = new ImageIcon(iconPath).getImage();
-				}
-				
-				// Create icon from image
-		        if (image != null) {
-		        	icon = new ImageIcon(image.getScaledInstance(PanMap.WIDTH, PanMap.HEIGHT, Image.SCALE_DEFAULT));
-		        	
-		        	// free memory
-		        	image.flush();
-		           	image = null;
-		            
-		            // load completed
-		            isLoaded = true;
-		        }
-				
-				// Request served
-				reloadRequested = false;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			// Terminate thread
-			iconLoaderThread.shutdown();
-		});
-	}
-	
+	/**
+	 * Koristi se prilikom ucitavanja mape, 
+	 * gde se iz ucitanih bajtova ikonice rekonstruise ikonica ukoliko je loaded flag postavljen
+	 * @param data - bajtovi ikonice
+	 */
 	public void init(byte[] data) {
 		if(isLoaded)
 			icon = new ImageIcon(data);
 	}
 	
+	/**
+	 * Dobavlja bajtove ikonice tako sto pretvara ikonicu u BufferedImage,
+	 * zatim ovaj BufferedImage pretvara u niz bajtova
+	 * @return bajtovi ikonice ukoliko je ucitana,
+	 * ukoliko nije ucitana ili je doslo do greske onda se vraca jedan random bajt koji se kasnije ignorise.
+	 */
 	public byte[] getByteArray() {
 		if(!isLoaded)
 			return new byte[1];
@@ -129,6 +84,10 @@ public class PanMapIcon implements Serializable {
 		}
 	}
 	
+	/**
+	 * Pretvara sliku ikonice u BufferedImage objekat
+	 * @return (BufferedImage) ikonice
+	 */
 	private BufferedImage getBufferedImageOfIcon() {
 		// Get image from icon
 		Image icon = this.icon.getImage();
@@ -143,5 +102,36 @@ public class PanMapIcon implements Serializable {
 
 	    // Return the buffered image
 	    return bimage;
+	}
+	
+	/**
+	 * Getter za loaded flag
+	 * @return Vraca true ukoliko je ikonica ucitana
+	 */
+	public boolean isLoaded() {
+		return isLoaded;
+	}
+	
+	/**
+	 * Getter za roditeljski cvor
+	 * @return Vraca handle na cvor mape za koji je ova ikonica vezana
+	 */
+	public PanMap getParent() {
+		return parent;
+	}
+
+	/**
+	 * Postavlja flag da je ikonica ucitana
+	 */
+	public void setLoadedFlag() {
+		isLoaded = true;
+	}
+	
+	/**
+	 * Postavlja ikonicu
+	 * @param icon - ikonica
+	 */
+	public void setIcon(ImageIcon icon) {
+		this.icon = icon;
 	}
 }

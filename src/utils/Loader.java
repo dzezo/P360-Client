@@ -19,27 +19,39 @@ public class Loader {
 	private static List<Integer> vbos = new ArrayList<Integer>();
 	private static List<Integer> textures = new ArrayList<Integer>();
 	
-	public static int loadToVAO(float[] positions, float[] textureCoords, int[] indices) {
-		int vaoID = createVAO();
-		bindIndicesBuffer(indices);
-		storeDataInAttributeList(0, 3, positions);
-		storeDataInAttributeList(1, 2, textureCoords);
-		// Unbind VAO
+	public static int loadToVAO(float[] positions, float[] textureCoords, int[] indices, int[] vbos) {
+		int vaoID;
+		
+		vaoID = glGenVertexArrays();
+		glBindVertexArray(vaoID);
+		
+		vbos[0] = bindIndicesBuffer(indices);
+		vbos[1] = storeDataInAttributeList(0, 3, positions);
+		vbos[2] = storeDataInAttributeList(1, 2, textureCoords);
+		
 		glBindVertexArray(0);
+		
 		return vaoID;
 	}
 	
 	public static int loadToVAO(float[] positions) {
-		int vaoID = createVAO();
-		storeDataInAttributeList(0, 2, positions);
-		// Unbind VAO
+		int vaoID, vboID;
+		
+		vaoID = glGenVertexArrays();
+		glBindVertexArray(vaoID);
+		
+		vboID = storeDataInAttributeList(0, 2, positions);
+		
 		glBindVertexArray(0);
+		
+		vaos.add(vaoID);
+		vbos.add(vboID);
 		return vaoID;
 	}
 	
 	/**
-	 * Using slick lib to load textures, textures must be (2^n x 2^n) and PNG
-	 * @param texturePath needs to be full path to the texture
+	 * Koristi slickUtil lib za ucitavanje tekstura. Tekstura mora da bude POT i PNG.
+	 * @param texturePath putanja do teksture
 	 * @return textureID
 	 */
 	public static int loadTexture(String texturePath) {
@@ -67,29 +79,26 @@ public class Loader {
 		}
 	}
 	
-	private static int createVAO() {
-		int vaoID = glGenVertexArrays();
-		vaos.add(vaoID);
-		glBindVertexArray(vaoID);
-		return vaoID;
-	}
-	
-	private static void storeDataInAttributeList(int attributeNumber, int coordinateSize, float[] data) {
+	private static int storeDataInAttributeList(int attributeNumber, int coordinateSize, float[] data) {
 		int vboID = glGenBuffers();
-		vbos.add(vboID);
+		
 		glBindBuffer(GL_ARRAY_BUFFER, vboID);
 		FloatBuffer buffer = BuffUtils.storeInFloatBuffer(data);
 		glBufferData(GL_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
 		
 		glVertexAttribPointer(attributeNumber, coordinateSize, GL_FLOAT, false, 0, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		
+		return vboID;
 	}
 
-	private static void bindIndicesBuffer(int[] indices) {
+	private static int bindIndicesBuffer(int[] indices) {
 		int vboID = glGenBuffers();
-		vbos.add(vboID);
+		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboID);
 		IntBuffer buffer = BuffUtils.storeInIntBuffer(indices);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+		
+		return vboID;
 	}
 }

@@ -6,39 +6,41 @@ import models.Body;
 import models.Cylinder;
 import models.Sphere;
 
-public class Panorama extends Texture {
-	/* BodyType */
-	public static final int TYPE_CYLINDRICAL = 0;
-	public static final int TYPE_SPHERICAL = 1;
-
-	private Body body;
-	private int type;
-	
-	/* World transform */
+public class Panorama extends Texture {	
 	private Vector3f translation = new Vector3f(0,0,0);
 	private Vector3f rotation = new Vector3f(0,0,0);
 	private Vector3f scale = new Vector3f(1,1,1);
 	
+	private Body[] parts = new Body[partsCount];
+	
 	public Panorama() {
 		super();
 		
-		float imageAspect = (float) width / (float) height;
-		if(imageAspect == 2) {
-			body = new Sphere(width);
-			type = TYPE_SPHERICAL;
-		}
-		else {
-			body = new Cylinder(width, height);
-			type = TYPE_CYLINDRICAL;
-		}
+		float imageAspect = (float) width / height;
+		
+		if(imageAspect == 2.0f)
+			for(int i = 0; i < partsCount; i++)
+				parts[i] = new Sphere(width, i, partsCount, textureID[i]);
+		else
+			for(int i = 0; i < 2; i++)
+				parts[i] = new Cylinder(width, height, i, partsCount, textureID[i]);
 	}
 	
-	public Body getBody() {
-		return body;
+	public void cleanUp() {
+		for(Body part : parts)
+			part.cleanUp();
+	}
+	
+	public Body[] getParts() {
+		return parts;
+	}
+	
+	public float getRadius() {
+		return parts[0].getRadius();
 	}
 	
 	public int getType() {
-		return type;
+		return parts[0].getType();
 	}
 	
 	public Vector3f getTranslation() {

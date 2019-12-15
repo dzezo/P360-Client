@@ -8,6 +8,7 @@ import glRenderer.AudioManager;
 import glRenderer.Scene;
 import panorama.PanGraph;
 import panorama.PanNode;
+import utils.ConfigData;
 
 public class TourManager implements Runnable{
 	private static ScheduledThreadPoolExecutor tour = new ScheduledThreadPoolExecutor(1);
@@ -20,7 +21,6 @@ public class TourManager implements Runnable{
 	private static long timeOfChange;
 	private static long visitedPanTime = 3000;
 	
-	private static boolean skipVisited = false;
 	private static boolean touring = false;
 	
 	/**
@@ -116,7 +116,7 @@ public class TourManager implements Runnable{
 		}
 		
 		// da li je panorama vec posecena, ukoliko jeste ispitaj uslov za prelaz na sledecu
-		if(skipVisited && activePano.visited) {
+		if(ConfigData.getSkipFlag() && activePano.visited) {
 			// na sledecu panoramu se prelazi ukoliko je isteklo dozvoljeno vreme za vec posecenu panoramu
 			long currentTime = System.currentTimeMillis();
 			if((currentTime - timeOfChange) > visitedPanTime) {
@@ -191,11 +191,4 @@ public class TourManager implements Runnable{
 			tourTasks.cancel(false);
 	}
 	
-	public static void setSkipVisited(boolean b) {
-		skipVisited = b;
-	}
-	
-	public static boolean getSkipVisited() {
-		return skipVisited;
-	}
 }

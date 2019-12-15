@@ -143,8 +143,7 @@ public class MapViewPanel extends MapPanel{
 		
 		setSelectedNode1(topNode);
 	}
-	
-	
+		
 	public void selectRight() {
 		if(PanGraph.isEmpty()) return;
 		
@@ -186,8 +185,7 @@ public class MapViewPanel extends MapPanel{
 		
 		setSelectedNode1(rightNode);
 	}
-	
-	
+		
 	public void selectBot() {
 		if(PanGraph.isEmpty()) return;
 		
@@ -229,8 +227,7 @@ public class MapViewPanel extends MapPanel{
 		
 		setSelectedNode1(botNode);
 	}
-	
-	
+		
 	public void selectLeft() {
 		if(PanGraph.isEmpty()) return;
 		
@@ -273,7 +270,6 @@ public class MapViewPanel extends MapPanel{
 		setSelectedNode1(leftNode);
 	}
 	
-	
 	private double getDistance(PanMap n1, PanMap n2) {
 		int x1 = n1.x;
 		int y1 = n1.y;
@@ -281,14 +277,12 @@ public class MapViewPanel extends MapPanel{
 		int y2 = n2.y;
 		return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
 	}
-	
-	
+		
 	public void confirmSelection() {
 		if(PanGraph.isEmpty()) return;
 		
 		setNextActivePanorama();
 	}
-	
 	
 	private void setSelectedNode1(PanNode selected) {
 		// deselect prev

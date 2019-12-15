@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 
 public class BuffUtils {
+	
 	public static IntBuffer storeInIntBuffer(int[] data) {
 		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
 		buffer.put(data).flip();
@@ -17,4 +18,5 @@ public class BuffUtils {
 		buffer.put(data).flip();
 		return buffer;
 	}
+	
 }

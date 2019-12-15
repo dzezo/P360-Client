@@ -4,11 +4,11 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
+import static utils.ConfigData.WORKING_DIR;
 
 public class ChooserUtils {
 	/* chooser */
 	private static JFileChooser jfc = new JFileChooser();
-	//private static ImagePreview preview = new ImagePreview(jfc);
 	
 	/* chooser filters */
 	private static FileFilter ff_image = new FileFilter() {
@@ -17,8 +17,7 @@ public class ChooserUtils {
 				return true;
 			String fileName = file.getName();
 			fileName = fileName.toLowerCase();
-			return (fileName.endsWith(".jpg")
-					|| fileName.endsWith(".pimg"));
+			return (fileName.endsWith(".jpg") || fileName.endsWith(".pimg"));
 		}
 		public String getDescription() {
 			return "*.jpg, *.pimg";
@@ -45,6 +44,17 @@ public class ChooserUtils {
 		}
 		public String getDescription() {
 			return "*.wav";
+		}
+	};
+	private static FileFilter ff_video = new FileFilter() {
+		public boolean accept(File file) {
+			if(file.isDirectory())
+				return true;
+			String fileName = file.getName();
+			return (fileName.endsWith(".avi") || fileName.endsWith(".mp4"));
+		}
+		public String getDescription() {
+			return "*.avi, *.mp4";
 		}
 	};
 
@@ -138,7 +148,7 @@ public class ChooserUtils {
 		jfc.setAcceptAllFileFilterUsed(false);
 		jfc.setMultiSelectionEnabled(false);
 		jfc.setFileFilter(ff_image);
-		//jfc.setAccessory(preview);
+		jfc.setAccessory(null);
 		
 		// show jfc
 		int result = jfc.showOpenDialog(null);
@@ -151,9 +161,7 @@ public class ChooserUtils {
 			jfc.setSelectedFile(new File(""));
 			
 			// check file type
-			if(!(panPath.toLowerCase().endsWith(".jpg") 
-					|| panPath.toLowerCase().endsWith(".tif")
-					|| panPath.toLowerCase().endsWith(".pimg"))) 
+			if(!(panPath.toLowerCase().endsWith(".jpg") || panPath.toLowerCase().endsWith(".pimg"))) 
 			{
 				// show error msg and leave
 				DialogUtils.showMessage("File type not supported", "Load Image");
@@ -186,7 +194,7 @@ public class ChooserUtils {
 		jfc.setAcceptAllFileFilterUsed(false);
 		jfc.setMultiSelectionEnabled(true);
 		jfc.setFileFilter(ff_image);
-		//jfc.setAccessory(preview);
+		jfc.setAccessory(null);
 		
 		// show jfc
 		int result = jfc.showOpenDialog(null);
@@ -201,9 +209,7 @@ public class ChooserUtils {
 			// check selected images
 			for(File image : images) {
 				// check file type
-				if(!(image.getPath().toLowerCase().endsWith(".jpg") 
-						|| image.getPath().toLowerCase().endsWith(".tif")
-						|| image.getPath().toLowerCase().endsWith(".pimg"))) 
+				if(!(image.getPath().toLowerCase().endsWith(".jpg") || image.getPath().toLowerCase().endsWith(".pimg"))) 
 				{
 					// show error msg and leave
 					DialogUtils.showMessage("File type not supported", "Load Image");
@@ -268,7 +274,52 @@ public class ChooserUtils {
 		
 	}
 	
-	public static void setWorkingDir(File workingDir) {
-		jfc.setCurrentDirectory(workingDir);
+	public static String openVideoDialog() {
+		// prep jfc
+		jfc.setAcceptAllFileFilterUsed(false);
+		jfc.setMultiSelectionEnabled(false);
+		jfc.setFileFilter(ff_video);
+		jfc.setAccessory(null);
+		
+		// show jfc
+		int result = jfc.showOpenDialog(null);
+		
+		if(result == JFileChooser.APPROVE_OPTION) {
+			String loadPath = jfc.getSelectedFile().getPath();
+			
+			// reset selected file
+			jfc.setSelectedFile(new File(""));
+			
+			// check file type
+			if(!(loadPath.toLowerCase().endsWith(".avi") || loadPath.toLowerCase().endsWith(".mp4"))) 
+			{
+				// show error msg and leave
+				DialogUtils.showMessage("File type not supported", "Load Video");
+				return null;
+			}
+			
+			// check if file exists
+			File file = new File(loadPath);
+			
+			// file does not exist
+			if(!file.exists()) {
+				// show error msg and leave
+				DialogUtils.showMessage("File does not exist", "Load Video");
+				return null;
+			}
+			// file exists
+			else {
+				// return path to file
+				return loadPath;
+			}
+		}
+		// opening canceled
+		else {
+			return null;
+		}
+	}
+	
+	public static void setWorkingDir() {
+		jfc.setCurrentDirectory(WORKING_DIR);
 	}
 }

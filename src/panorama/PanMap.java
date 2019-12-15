@@ -23,11 +23,12 @@ public class PanMap extends Rectangle {
 	
 	protected String panName;
 	protected String audioName;
+	protected String videoName;
 	protected PanMapIcon icon;
 	
 	/* Fonts */
 	private static Font panNameFont = new Font("Arial", Font.BOLD, 15);
-	private static Font audioNameFont = new Font("Arial", Font.PLAIN, 15);
+	private static Font extrasFont = new Font("Arial", Font.PLAIN, 15);
 	
 	/* Colors */
 	private static final Color normalColor = new Color(255,255,255);
@@ -67,12 +68,13 @@ public class PanMap extends Rectangle {
 	public PanMap(PanNode parent, int x, int y) {
 		super(x, y, WIDTH, HEIGHT);
 		this.parent = parent;
-		this.panName = setNameFromPath(parent.getPanoramaPath());
+		this.panName = getNameFromPath(parent.getPanoramaPath());
+		this.icon = new PanMapIcon(this);
 		
 		calculatePorts(x,y);       
 	}
 	
-	public String setNameFromPath(String path) {
+	public String getNameFromPath(String path) {
 		String separator = System.getProperty("file.separator");
 		int lastSeparatorIndex = path.lastIndexOf(separator);
 		
@@ -264,12 +266,9 @@ public class PanMap extends Rectangle {
 		if(!panelRect.intersects(this)) return;
 		
 		// draw fill
-		// create icon if non exists
-		if(icon == null) {
-			icon = new PanMapIcon(this);
-		}
-		else if(!icon.isLoaded())
-			icon.reloadIcon();
+		// load icon if not loaded
+		if(!icon.isLoaded())
+			icon.loadIcon();
 		
 		// draw icon/text
 		if(PanGraph.isTextMode() || !icon.isLoaded()) {
@@ -337,14 +336,32 @@ public class PanMap extends Rectangle {
 			panName = panName.substring(0, panName.length() - 1);
 		}
 		
-		if(audioName == null) {
+		if(audioName == null && videoName == null) {
 			int x = (int)this.getCenterX() - g.getFontMetrics().stringWidth(panName) / 2;
 			int y = (int)this.getCenterY() + g.getFontMetrics().getHeight() / 4;
 			g.drawString(panName, x, y);
 		}
-		else {			
+		else if(audioName == null || videoName == null) {
 			int x = (int)this.getCenterX() - g.getFontMetrics().stringWidth(panName) / 2;
 			int y = (int)this.getCenterY();
+			g.drawString(panName, x, y);
+			
+			String attachmentName = (audioName == null) ? videoName : audioName;
+			
+			// cut attachment name text if needed
+			while(g.getFontMetrics().stringWidth(attachmentName) > WIDTH-10) {
+				attachmentName = attachmentName.substring(0, attachmentName.length() - 1);
+			}
+			
+			g.setFont(extrasFont);
+			
+			x = (int)this.getCenterX() - g.getFontMetrics().stringWidth(attachmentName) / 2;
+			y = (int)this.getCenterY() + 25;
+			g.drawString(attachmentName, x, y);
+		}
+		else {			
+			int x = (int)this.getCenterX() - g.getFontMetrics().stringWidth(panName) / 2;
+			int y = (int)this.getCenterY() - 7;
 			g.drawString(panName, x, y);
 			
 			// cut audio text if needed
@@ -352,11 +369,20 @@ public class PanMap extends Rectangle {
 				audioName = audioName.substring(0, audioName.length() - 1);
 			}
 			
-			g.setFont(audioNameFont);
+			// cut video text if needed
+			while(g.getFontMetrics().stringWidth(videoName) > WIDTH-10) {
+				videoName = videoName.substring(0, videoName.length() - 1);
+			}
+			
+			g.setFont(extrasFont);
 			
 			x = (int)this.getCenterX() - g.getFontMetrics().stringWidth(audioName) / 2;
-			y = (int)this.getCenterY() + 25;
+			y = (int)this.getCenterY() + 11;
 			g.drawString(audioName, x, y);
+			
+			x = (int)this.getCenterX() - g.getFontMetrics().stringWidth(videoName) / 2;
+			y = (int)this.getCenterY() + 32;
+			g.drawString(videoName, x, y);
 		}
 	}
 	
@@ -412,5 +438,5 @@ public class PanMap extends Rectangle {
 			borderColor = activeColor;
 		}
 	}
-	
+
 }

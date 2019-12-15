@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import main.Main;
+import static utils.ConfigData.WORKING_DIR;
 
 public class ImageCipher {
 	
@@ -116,7 +116,7 @@ public class ImageCipher {
 		// Decrypted data is at working_dir\tmp.pimg
 		
 		String strSrcImage = imagePath;
-		String strDstImage = Main.WORKING_DIR.getPath() + "\\tmp.pimg";
+		String strDstImage = WORKING_DIR.getPath() + "\\tmp.pimg";
 		
 		FileInputStream inStream = new FileInputStream(strSrcImage);
 		FileOutputStream outStream = new FileOutputStream(strDstImage);

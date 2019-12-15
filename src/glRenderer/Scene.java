@@ -3,26 +3,28 @@ package glRenderer;
 import gui.GuiNavButtons;
 import panorama.PanNode;
 import panorama.Panorama;
+import utils.ConfigData;
 
 public class Scene {
 	private static PanNode activePanorama;
 	private static PanNode queuedPanorama;
 	private static Camera camera;
 	private static boolean ready = false;
-	private static boolean refreshScene = false;
 	
-	public static void loadNewImage(PanNode newImage) {
-		// reset ready flag
-		ready = false;
+	public static void loadNewActivePanorama(PanNode newImage) {
+		activePanorama = newImage;
+		activePanorama.loadPanorama();
 		
-		// prepare renderer
-		initScene(newImage);
-		
-		// set available nav buttons
+		Renderer.requestNewProjection();		
 		GuiNavButtons.setAvailableNavButtons(activePanorama);
 		
-		// set ready flag
+		queuedPanorama = null;
 		ready = true;
+	}
+	
+	public static void unloadActivePanorama() {
+		if(activePanorama != null)
+			activePanorama.unloadPanorama();
 	}
 	
 	/**
@@ -56,29 +58,34 @@ public class Scene {
 		// Queue image for loading
 		queuedPanorama = panorama;
 		
-		// If loaded, there is no need to stop the scene
-		if(queuedPanorama.isLoaded()) return;
-		
 		// Loading started
 		// Stop displaying active panorama
 		ready = false;
 	}
 	
 	public static void dequeuePanorama() {
-		queuedPanorama = activePanorama;
-		
 		// Loading canceled
-		// Start displaying active panorama
-		ready = true;
+		if(activePanorama != null) {
+			// Display active panorama if exists
+			queuePanorama(activePanorama);
+		}
+		else {
+			// Wait for another input
+			queuedPanorama = null;
+			ready = false;
+		}
+		
 	}
 	
 	public static PanNode getQueuedPanorama() {
 		return queuedPanorama;
 	}
 	
-	/**
-	 * Interfejs za navigaciju dugmicima
-	 */
+	public static boolean changeRequested() {
+		return queuedPanorama != null;
+	}
+	
+	// Interfejs za navigaciju dugmicima
 	
 	/**
 	 * Skace na odabranu susednu panoramu.
@@ -90,17 +97,23 @@ public class Scene {
 	 * <br><b>3</b> - levo
 	 */
 	public static void goSide(int selectedSide) {
-		int numOfSides = 4;
-		int actualSide = 4;
-		float camAngle = camera.getYaw();
-		float refAngle = 315.0f;
+		int actualSide;
 		
-		while(!(camAngle>refAngle) && refAngle>0) {
-			actualSide--;
-			refAngle -= 90;
+		if(ConfigData.getFixGUIFlag()) {
+			actualSide = selectedSide;
 		}
-		
-		actualSide = (selectedSide + actualSide) % numOfSides;
+		else {
+			int numOfSides = 4;
+			float camAngle = camera.getYaw();
+			float refAngle = 315.0f;
+			
+			actualSide = numOfSides;
+			while(!(camAngle>refAngle) && refAngle>0) {
+				actualSide--;
+				refAngle -= 90;
+			}
+			actualSide = (selectedSide + actualSide) % numOfSides;
+		}
 		
 		switch(actualSide) {
 		case 0:
@@ -143,33 +156,6 @@ public class Scene {
 		if(activePanorama.getBot() !=null) {
 			queuePanorama(activePanorama.getBot());
 		}
-	}
-	
-	/**
-	 * Ucitava aktivnu panoramu na scenu
-	 */
-	public static void initScene(PanNode newImage) {
-		// set image to load
-		activePanorama = newImage;
-		
-		activePanorama.loadPanorama();
-		Renderer.setNewProjection();
-	}
-	
-	public static boolean changeRequested() {
-		if(refreshScene) {
-			GuiNavButtons.setAvailableNavButtons(activePanorama);
-			refreshScene = false;
-		}
-		
-		return activePanorama != queuedPanorama;
-	}
-	
-	public static void refreshScene(PanNode panorama) {
-		if(activePanorama == panorama)
-			refreshScene = true;
-		else
-			queuePanorama(panorama);
 	}
 	
 }

@@ -10,6 +10,9 @@ import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
+
 import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.vector.Vector2f;
@@ -26,6 +29,8 @@ public class DisplayManager {
 	private static Cursor emptyCursor;
 	
 	private static boolean toFullscreen = false;
+	private static boolean fullScreenRequest = false;
+	private static boolean windowedRequest = false;
 	
 	public static void createDisplay(Canvas canvas) {
 		ContextAttribs attribs = new ContextAttribs(3,3).withForwardCompatible(true).withProfileCore(true);
@@ -34,7 +39,8 @@ public class DisplayManager {
 			Display.setParent(canvas);
 			Display.setTitle("P360");
 			Display.setVSyncEnabled(true);
-			Display.create(new PixelFormat(), attribs);
+			Display.create(new PixelFormat().withSamples(4), attribs);
+			GL11.glEnable(GL13.GL_MULTISAMPLE);
 		}
 		catch(LWJGLException e){
 			e.printStackTrace();
@@ -73,7 +79,7 @@ public class DisplayManager {
 		return HEIGHT;
 	}
 	
-	public static void setFullscreen() {
+	private static void setFullscreen() {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int width = (int) screenSize.getWidth();
 		int height = (int) screenSize.getHeight();
@@ -83,7 +89,7 @@ public class DisplayManager {
 			e.printStackTrace();
 		}
 		// Recalculate projection matrix
-		Renderer.setNewProjection();
+		Renderer.requestNewProjection();
 		// Where to render on display
 		glViewport(0, 0, width, height);
 		// Inform about resizing
@@ -94,38 +100,18 @@ public class DisplayManager {
 		return Display.isFullscreen();
 	}
 	
-	public static void setWindowed() {
+	private static void setWindowed() {
 		try {
 			Display.setFullscreen(false);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}
 		// Recalculate projection matrix
-		Renderer.setNewProjection();
+		Renderer.requestNewProjection();
 		// Where to render on display
 		glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		// Inform about resizing
 		resized = true;
-	}
-	
-	/**
-	 * Sets request to return to fullscreen mode when possible
-	 */
-	public static void setReturnToFullscreen() {
-		toFullscreen = true;
-	}
-	
-	/**
-	 * Checks for a fullscreen request
-	 * @return true if request was set
-	 */
-	public static boolean returnToFullscreen() {
-		if(toFullscreen) {
-			toFullscreen = false;
-			return true;
-		}
-		
-		return false;
 	}
 	
 	public static boolean wasResized() {
@@ -176,4 +162,43 @@ public class DisplayManager {
 	public static boolean isMouseInWindow() {
 		return Mouse.isInsideWindow();
 	}
+
+	/* Requests */
+	public static void serveRequests() {
+		if(fullScreenRequest && !Display.isFullscreen()) {
+			DisplayManager.setFullscreen();
+			fullScreenRequest = false;
+		}
+		if(windowedRequest && Display.isFullscreen()) {
+			DisplayManager.setWindowed();
+			windowedRequest = false;
+		}
+	}
+	
+	public static void requestFullScreen() {
+		fullScreenRequest = true;
+	}
+	
+	public static void requestWindowed() {
+		windowedRequest = true;
+	}
+	
+	
+	public static void requestReturnToFullScreen() {
+		toFullscreen = true;
+	}
+	
+	/**
+	 * Poziv ce resetovati return to full screen flag.
+	 * @return stanje return to full screen flag-a
+	 */
+	public static boolean returnToFullScreenRequested() {
+		if(toFullscreen) {
+			toFullscreen = false;
+			return true;
+		}
+		
+		return toFullscreen;
+	}
+	
 }

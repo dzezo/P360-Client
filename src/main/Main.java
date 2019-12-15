@@ -1,13 +1,16 @@
 package main;
 
-import java.io.File;
+import static utils.ConfigData.WORKING_DIR;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import frames.MainFrame;
+import frames.MapViewFrame;
 import glRenderer.AudioManager;
 import glRenderer.Camera;
 import glRenderer.DisplayManager;
@@ -17,15 +20,16 @@ import gui.GuiNavButtons;
 import gui.GuiRenderer;
 import gui.GuiSprites;
 import input.InputManager;
+import loaders.IconLoader;
+import loaders.ImageLoader;
 import shaders.GuiShader;
 import shaders.StaticShader;
 import utils.AutoLoad;
 import utils.ChooserUtils;
-import utils.ImageLoader;
+import utils.ConfigData;
 import utils.Loader;
 
 public class Main {
-	public static final File WORKING_DIR = new File("C:\\p360system");
 	
 	public static void main(String[] args) throws Exception {
 		// set system look and feel
@@ -39,10 +43,15 @@ public class Main {
 		}
 		
 		// set working dir
-		ChooserUtils.setWorkingDir(WORKING_DIR);
+		ChooserUtils.setWorkingDir();
 		
 		// init
-		MainFrame mainFrame = new MainFrame("P360");
+		SwingUtilities.invokeAndWait(new Runnable() {
+			public void run() {
+				MapViewFrame.getInstance();
+			}
+		});
+		MainFrame mainFrame = MainFrame.getInstance();
 		
 		Camera camera = new Camera();
 		StaticShader shader = new StaticShader();
@@ -53,25 +62,25 @@ public class Main {
 		GuiSprites.init();
 		
 		// load previously used map
+		ImageLoader imageLoader = ImageLoader.getInstance();
+		IconLoader iconLoader = IconLoader.getInstance();
 		AutoLoad.load();
 		
 		while(mainFrame.isRunning()) {
 			// check for changes
 			if(Scene.changeRequested()) {
-				if(Scene.getQueuedPanorama().isLoaded() || ImageLoader.isLoaded()) {
-					Scene.loadNewImage(Scene.getQueuedPanorama());
-	
-					ImageLoader.resetLoader();
+				if(imageLoader.isLoaded()) {
+					Scene.loadNewActivePanorama(Scene.getQueuedPanorama());
+					imageLoader.resetLoader();
 				}
-				else if(!ImageLoader.isLoading()){
+				else if(!imageLoader.isLoading()){
 					AudioManager.stopAudio();
-					ImageLoader.loadImage(Scene.getQueuedPanorama().getPanoramaPath());
+					Scene.unloadActivePanorama();
+					imageLoader.loadImage(Scene.getQueuedPanorama().getPanoramaPath());
 				}
-				else if(ImageLoader.isCanceled()) {
+				else if(imageLoader.isCanceled()) {
 					Scene.dequeuePanorama();
-					Scene.setReady(false);
-					
-					ImageLoader.resetLoader();
+					imageLoader.resetLoader();
 				}
 			}
 			
@@ -79,7 +88,7 @@ public class Main {
 			Renderer.prepare();
 			
 			if(Scene.isReady()) {
-				if(!ImageLoader.isLoading()) {
+				if(!imageLoader.isLoading()) {
 					InputManager.readInput();		
 				}
 				
@@ -99,18 +108,34 @@ public class Main {
 			GuiRenderer.render(guiShader);
 			
 			// update display
+			DisplayManager.serveRequests();
 			DisplayManager.updateDisplay();
 			
 		}
 		
+		// Disposing frames
+		SwingUtilities.invokeAndWait(new Runnable() {
+			public void run() {
+				MapViewFrame.getInstance().cleanUp();
+			}
+		});
+		MainFrame.getInstance().cleanUp();
+		
 		// stop audio
 		AudioManager.stopAudio();
+		
+		// stop loaders
+		imageLoader.doStop();
+		iconLoader.doStop();
 		
 		// Releasing resources
 		shader.cleanUp();
 		guiShader.cleanUp();
 		Loader.cleanUp();
 		DisplayManager.closeDisplay();
+		
+		// Save config data
+    	ConfigData.updateConfigFile();
 		
 		// Everything is released exit
 		System.exit(0);

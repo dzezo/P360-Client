@@ -14,20 +14,30 @@ import javax.swing.JToolBar;
 
 import glRenderer.DisplayManager;
 import glRenderer.Scene;
-import input.InputManager;
+import loaders.IconLoader;
 import panorama.PanGraph;
 import panorama.PanNode;
 import utils.ChooserUtils;
 
 @SuppressWarnings("serial")
 public class MapViewFrame extends MapFrame {
-	// ToolBar
-	private JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
-	private JButton b_center = new JButton(new ImageIcon(Class.class.getResource("/toolbar/center.png")));
-	private JToggleButton b_textMode = new JToggleButton(new ImageIcon(Class.class.getResource("/toolbar/text.png")));
+	private static volatile MapViewFrame instance = null;
 	
-	public MapViewFrame(String title) {
-		super(title);
+	public static synchronized MapViewFrame getInstance() {
+		if(instance == null) {
+			instance = new MapViewFrame();
+		}
+		
+		return instance;
+	}
+	
+	// ToolBar
+	final private JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+	final private JButton b_center = new JButton(new ImageIcon(Class.class.getResource("/toolbar/center.png")));
+	final private JToggleButton b_textMode = new JToggleButton(new ImageIcon(Class.class.getResource("/toolbar/text.png")));
+	
+	private MapViewFrame() {
+		super("P360");
 		// instantiate map panel
 		mapPanel = new MapViewPanel();
 		
@@ -36,9 +46,27 @@ public class MapViewFrame extends MapFrame {
 		createFrame();
 	}
 	
+	private void createToolBar() {
+		// JButton ActionListeners
+		b_center.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) { centerMap(); }
+		});
+		b_textMode.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) { setTextMode(); }
+		});
+		
+		// The JToolBar uses a BoxLayout to layout it’s components.
+		toolbar.add(b_center);
+		toolbar.addSeparator();
+		toolbar.add(b_textMode);
+		
+		// Disables toolbar from moving
+		toolbar.setFloatable(false);
+		getContentPane().add(toolbar, BorderLayout.WEST);
+	}
+	
 	private void createFrame() {
 		setSize(mapWidth, mapHeight);
-		setAlwaysOnTop(true);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
@@ -64,34 +92,19 @@ public class MapViewFrame extends MapFrame {
         });
 	}
 	
-	private void createToolBar() {
-		// JButton ActionListeners
-		b_center.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) { centerMap(); }
-		});
-		b_textMode.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) { setTextMode(); }
-		});
-		
-		// The JToolBar uses a BoxLayout to layout it’s components.
-		toolbar.add(b_center);
-		toolbar.addSeparator();
-		toolbar.add(b_textMode);
-		
-		// Disables toolbar from moving
-		toolbar.setFloatable(false);
-		getContentPane().add(toolbar, BorderLayout.WEST);
-	}
-	
 	public void showFrame() {
 		// show frame
 		setVisible(true);
 		setTitle(PanGraph.getName());
+		toFront();
+		repaint();
 		
 		// set origin of a map
 		setOrigin();
+		
+		// Unpause IconLoader
+		IconLoader.getInstance().postponeLoading(false);
 	}
-	
 	
 	public void hideFrame() {
 		// stop frame repaint
@@ -102,13 +115,16 @@ public class MapViewFrame extends MapFrame {
         
     	// hide frame
         setVisible(false);
+        MainFrame.getInstance().setVisible(true);
         
-        // set fullscreen if necessary
-        if(DisplayManager.returnToFullscreen()) {
-        	InputManager.requestFullscreen();
-        }
+        // get back to fullscreen mode
+        if(DisplayManager.returnToFullScreenRequested())
+        	DisplayManager.requestFullScreen();
+        
+        // Pause IconLoader
+        IconLoader.getInstance().postponeLoading(true);
 	}
-
+	
 	public boolean load() {
 		// get path
 		String loadPath = ChooserUtils.openMapDialog();
