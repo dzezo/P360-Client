@@ -29,7 +29,7 @@ import utils.ChooserUtils;
 import utils.ConfigData;
 import utils.Loader;
 
-public class P360_Client {
+public class P360_Client_Launcher {
 	
 	public static void main(String[] args) throws Exception {
 		// set system look and feel
