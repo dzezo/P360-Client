@@ -2,6 +2,7 @@ package frames;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import javax.swing.JComponent;
@@ -14,17 +15,26 @@ import panorama.PanNode;
 public abstract class MapPanel extends JComponent {
 	protected MapFrame parent;
 	
+	protected final static int GRID_SIZE = 10;
+	
 	protected Color panelColor = new Color(128,128,128);
 	
-	protected int originX = 0;
-	protected int originY = 0;
-	protected int mouseX;
-	protected int mouseY;
-	
 	protected Rectangle panelRect = new Rectangle();
+	protected Point mouseClick = new Point(0, 0);
+	protected Point origin = new Point(0, 0);
 	
 	protected PanNode selectedNode1;
 	protected PanNode selectedNode2;
+	
+	private boolean panelDragAllowed;
+	
+	protected void setPanelDragAllowed(boolean b) {
+		panelDragAllowed = b;
+	}
+	
+	protected boolean isPanelDragAllowed() {
+		return panelDragAllowed;
+	}
 	
 	protected boolean isNodeSelected(PanMap node) {
 		if(selectedNode1 != null && selectedNode1.getMapNode() == node)
@@ -34,12 +44,12 @@ public abstract class MapPanel extends JComponent {
 		return false;
 	}
 	
-	protected PanNode getSelectedNode(int x,int y) {
+	protected PanNode getSelectedNode() {
 		PanNode selectedNode = null;
 		PanNode start = PanGraph.getHead();
 		while(start != null) {
 			PanMap node = start.getMapNode();
-			if(node.isPressed(x, y, originX, originY)) {
+			if(node.isPressed(mouseClick.x, mouseClick.y, origin.x, origin.y)) {
 				selectedNode = start;
 			}
 			start = start.getNext();
@@ -49,20 +59,16 @@ public abstract class MapPanel extends JComponent {
 	
 	protected void dragPanel(int dragX, int dragY) {
 		int dx, dy;
-		dx = dragX - mouseX;
-		dy = dragY - mouseY;
-		originX += dx;
-		originY += dy;
-		mouseX = dragX;
-		mouseY = dragY;
+		dx = dragX - mouseClick.x;
+		dy = dragY - mouseClick.y;
+		origin.x += dx;
+		origin.y += dy;
+		mouseClick.x = dragX;
+		mouseClick.y = dragY;
 	}
 	
-	public int getOriginX() {
-		return -originX;
-	}
-	
-	public int getOriginY() {
-		return -originY;
+	public Point getOrigin() {
+		return origin;
 	}
 
 	public PanNode getSelectedNode1() {
@@ -87,6 +93,10 @@ public abstract class MapPanel extends JComponent {
 	
 	public void setParent(MapFrame parentFrame) {
 		this.parent = parentFrame;
+	}
+	
+	public static int getGridSize() {
+		return GRID_SIZE;
 	}
 	
 	public abstract void paint(Graphics g);

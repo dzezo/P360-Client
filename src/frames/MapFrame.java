@@ -11,24 +11,23 @@ import panorama.PanMap;
 
 @SuppressWarnings("serial")
 public abstract class MapFrame extends Frame {
-	protected ScheduledThreadPoolExecutor repaint = new ScheduledThreadPoolExecutor(5);;
-	protected ScheduledFuture<?> repaintTasks;
+	protected static final Dimension mapSize = Toolkit.getDefaultToolkit().getScreenSize();
 	
-	public static int mapWidth;
-	public static int mapHeight;
+	private ScheduledThreadPoolExecutor repaint = new ScheduledThreadPoolExecutor(5);
+	private ScheduledFuture<?> repaintTasks;
 	
-	protected MapPanel mapPanel;
+	private MapPanel mapPanel;
 	
 	public MapFrame(String title) {
 		super(title);
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		
-		mapWidth = screenSize.width;
-		mapHeight = screenSize.height;
 	}
 	
 	public MapPanel getMapPanel() {
 		return this.mapPanel;
+	}
+	
+	public void setMapPanel(MapPanel newMapPanel) {
+		this.mapPanel = newMapPanel;
 	}
 	
 	protected void startFrameRepaint() {
@@ -43,10 +42,10 @@ public abstract class MapFrame extends Frame {
 	}
 	
 	protected void setOrigin() {
-		if(PanGraph.getHome() != null) {
+		if(!PanGraph.isEmpty()) {
 			// map center
-			int x = PanGraph.getCenterX();
-			int y = PanGraph.getCenterY();
+			int x = PanGraph.getGraphSize().getCenterX();
+			int y = PanGraph.getGraphSize().getCenterY();
 			
 			// node size
 			int h = PanMap.HEIGHT / 2;

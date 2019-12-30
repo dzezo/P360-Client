@@ -19,12 +19,12 @@ public abstract class GuiSprite implements ISprite {
 		}
 	}
 	
-	public void setPositon(Vector2f position) {
-		guiTexture.setPosition(position);
+	public void setPositon(float x, float y) {
+		guiTexture.setPosition(x, y);
 	}
 	
-	public void setScale(Vector2f scale) {
-		guiTexture.setScale(scale);
+	public void setScale(float sx, float sy) {
+		guiTexture.setScale(sx, sy);
 	}
 
 	public void hide() {

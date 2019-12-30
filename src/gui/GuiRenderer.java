@@ -14,8 +14,15 @@ import org.lwjgl.util.vector.Vector3f;
 import shaders.GuiShader;
 
 public class GuiRenderer {
+	private static final Vector3f X_AXIS = new Vector3f(1, 0, 0);
+	private static final Vector3f Y_AXIS = new Vector3f(0, 1, 0);
+	private static final Vector3f Z_AXIS = new Vector3f(0, 0, 1);
+	
 	private static final GuiQuad quad = new GuiQuad();
 	private static List<GuiTexture> guis = new ArrayList<GuiTexture>();
+	
+	private static Matrix4f transformationMatrix = new Matrix4f();
+	private static Vector3f transformationScale = new Vector3f();
 	
 	public static void render(GuiShader shader) {
 		shader.start();
@@ -26,10 +33,11 @@ public class GuiRenderer {
 		glDisable(GL_DEPTH_TEST);
 		// RENDERING
 		for(GuiTexture gui : guis) {
+			createTransformationMatrix(gui.getPosition(), gui.getRotation(), gui.getScale());
+			shader.loadTransformation(transformationMatrix);
+			
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, gui.getTexture());
-			Matrix4f matrix = createTransformationMatrix(gui.getPosition(), gui.getRotation(), gui.getScale());
-			shader.loadTransformation(matrix);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
 		}
 		glEnable(GL_DEPTH_TEST);
@@ -42,14 +50,13 @@ public class GuiRenderer {
 		return guis;
 	}
 	
-	private static Matrix4f createTransformationMatrix(Vector2f translation, Vector3f rotation, Vector2f scale) {
-		Matrix4f matrix = new Matrix4f();
-		matrix.setIdentity();
-		Matrix4f.translate(translation, matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rotation.x), new Vector3f(1,0,0), matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rotation.y), new Vector3f(0,1,0), matrix, matrix);
-		Matrix4f.rotate((float) Math.toRadians(rotation.z), new Vector3f(0,0,1), matrix, matrix);
-		Matrix4f.scale(new Vector3f(scale.x, scale.y, 1f), matrix, matrix);
-		return matrix;
+	private static void createTransformationMatrix(Vector2f translation, Vector3f rotation, Vector2f scale) {
+		transformationMatrix.setIdentity();
+		Matrix4f.translate(translation, transformationMatrix, transformationMatrix);
+		Matrix4f.rotate((float) Math.toRadians(rotation.x), X_AXIS, transformationMatrix, transformationMatrix);
+		Matrix4f.rotate((float) Math.toRadians(rotation.y), Y_AXIS, transformationMatrix, transformationMatrix);
+		Matrix4f.rotate((float) Math.toRadians(rotation.z), Z_AXIS, transformationMatrix, transformationMatrix);
+		transformationScale.set(scale.getX(), scale.getY(), 1.0f);
+		Matrix4f.scale(transformationScale, transformationMatrix, transformationMatrix);
 	}
 }

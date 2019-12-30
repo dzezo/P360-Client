@@ -24,6 +24,7 @@ public class DisplayManager {
 	
 	private static boolean resized = false;
 	
+	private static Vector2f normalizedCursorPosition = new Vector2f();
 	private static boolean cursorVisible = true;
 	private static Cursor nativeCursor;
 	private static Cursor emptyCursor;
@@ -122,10 +123,11 @@ public class DisplayManager {
 		if(resized) resized = false;
 	}
 	
-	public static Vector2f getNormalizedMouseCoords() {
+	public static Vector2f getNormalizedCursorPosition() {
 		float normalizedX = -1.0f + 2.0f * (float)Mouse.getX() / (float)Display.getWidth();
 		float normalizedY = 1.0f - 2.0f * (float)Mouse.getY() / (float)Display.getHeight();
-		return new Vector2f(normalizedX, normalizedY);
+		normalizedCursorPosition.set(normalizedX, normalizedY);
+		return normalizedCursorPosition;
 	}
 	
 	/**

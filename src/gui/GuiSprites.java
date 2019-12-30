@@ -31,8 +31,8 @@ public class GuiSprites {
 		// Show loading sprite if loading sprite is hidden and show is requested
 		if(show && loading.isHidden()) {
 			if(!cancel.isHidden()) {
-				cancel.setPositon(new Vector2f(0.125f, 0.0f));
-				cancel.setScale(new Vector2f(0.05f, 0.05f));
+				cancel.setPositon(0.125f, 0.0f);
+				cancel.setScale(0.05f, 0.05f);
 			}
 			loading.show();
 		}
@@ -40,8 +40,8 @@ public class GuiSprites {
 		else if(!show && !loading.isHidden()) {
 			loading.hide();
 			if(!cancel.isHidden()) {
-				cancel.setPositon(new Vector2f(0, 0));
-				cancel.setScale(new Vector2f(0.075f, 0.075f));
+				cancel.setPositon(0, 0);
+				cancel.setScale(0.075f, 0.075f);
 			}
 		}
 	}
@@ -64,8 +64,8 @@ public class GuiSprites {
 		}
 		else {
 			cancel.hide();
-			cancel.setPositon(new Vector2f(0, 0));
-			cancel.setScale(new Vector2f(0.075f, 0.075f));
+			cancel.setPositon(0, 0);
+			cancel.setScale(0.075f, 0.075f);
 		}
 	}
 }

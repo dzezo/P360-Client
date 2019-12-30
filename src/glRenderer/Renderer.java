@@ -20,7 +20,13 @@ public class Renderer {
 	private static final float HFOV_CAP = 80f;
 	private static final float VFOV_CAP = 70f;
 	private static final float NEAR_PLANE = 0.1f;
-	private static final float FAR_PLANE = 500000f;
+	private static final float FAR_PLANE = 100000f;
+	
+	private static final Vector3f X_AXIS = new Vector3f(1, 0, 0);
+	private static final Vector3f Y_AXIS = new Vector3f(0, 1, 0);
+	
+	private static Matrix4f viewMatrix = new Matrix4f();
+	private static Matrix4f projectionMatrix = new Matrix4f();
 	
 	private static boolean projectionRequestFlag = false;
 	
@@ -51,7 +57,6 @@ public class Renderer {
 			DisplayManager.confirmResize();
 			shader.loadProjectionMatrix(createProjectionMatrix());
 		}
-		shader.loadTransformationMatrix(createTransformationMatrix());
 		
 		glActiveTexture(GL_TEXTURE0);
 		for(Body part : Scene.getPanorama().getParts()) {
@@ -105,8 +110,6 @@ public class Renderer {
 		float y_scale = (float)(1f/Math.tan(Math.toRadians(vFOV)/2));
 		float frustrum_length = FAR_PLANE - NEAR_PLANE;
 		
-		Matrix4f projectionMatrix = new Matrix4f();
-		projectionMatrix = new Matrix4f();
 		projectionMatrix.m00 = x_scale;
 		projectionMatrix.m11 = y_scale;
 		projectionMatrix.m22 = -((FAR_PLANE + NEAR_PLANE) / frustrum_length);
@@ -115,26 +118,11 @@ public class Renderer {
 		projectionMatrix.m33 = 0;
 		return projectionMatrix;
 	}
-
-	private static Matrix4f createTransformationMatrix() {
-		Matrix4f transformationMatrix = new Matrix4f();
-		transformationMatrix.setIdentity();
-		Matrix4f.translate(Scene.getPanorama().getTranslation(), transformationMatrix, transformationMatrix);
-		Matrix4f.rotate((float) Math.toRadians(Scene.getPanorama().getRotation().x), new Vector3f(1,0,0), transformationMatrix, transformationMatrix);
-		Matrix4f.rotate((float) Math.toRadians(Scene.getPanorama().getRotation().y), new Vector3f(0,1,0), transformationMatrix, transformationMatrix);
-		Matrix4f.rotate((float) Math.toRadians(Scene.getPanorama().getRotation().z), new Vector3f(0,0,1), transformationMatrix, transformationMatrix);
-		Matrix4f.scale(Scene.getPanorama().getScale(), transformationMatrix, transformationMatrix);
-		return transformationMatrix;
-	}
 	
 	private static Matrix4f createViewMatrix() {
-		Matrix4f viewMatrix = new Matrix4f();
 		viewMatrix.setIdentity();
-		Matrix4f.rotate((float) Math.toRadians(Scene.getCamera().getPitch()), new Vector3f(1,0,0), viewMatrix, viewMatrix);
-		Matrix4f.rotate((float) Math.toRadians(Scene.getCamera().getYaw()), new Vector3f(0,1,0), viewMatrix, viewMatrix);
-		Vector3f cameraPos = Scene.getCamera().getPosition();
-		Vector3f negativeCameraPos = new Vector3f(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-		Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);
+		Matrix4f.rotate((float) Math.toRadians(Scene.getCamera().getPitch()), X_AXIS, viewMatrix, viewMatrix);
+		Matrix4f.rotate((float) Math.toRadians(Scene.getCamera().getYaw()), Y_AXIS, viewMatrix, viewMatrix);
 		return viewMatrix;
 	}
 }

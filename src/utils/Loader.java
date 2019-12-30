@@ -30,7 +30,6 @@ public class Loader {
 		vbos[2] = storeDataInAttributeList(1, 2, textureCoords);
 		
 		glBindVertexArray(0);
-		
 		return vaoID;
 	}
 	

@@ -1,14 +1,9 @@
 package glRenderer;
 
-import org.lwjgl.util.vector.Vector3f;
-
 import input.InputManager;
 import utils.ConfigData;
 
 public class Camera {
-	// Camera world position
-	private Vector3f position = new Vector3f(0, 0, 0);
-	
 	// Camera angles
 	private float pitch;
 	private float pitchMax;
@@ -29,13 +24,6 @@ public class Camera {
 	private final float autoPanSpeed = 0.05f;
 	private	final float pitchDampingFactor = 0.005f; // range from 1 to 0
 	private final long autoPanLatency = 2500; // in milis
-	
-	/**
-	 * Get camera wold positon
-	 */
-	public Vector3f getPosition() {
-		return position;
-	}
 
 	/* PITCH CONTROL METHODS */
 	

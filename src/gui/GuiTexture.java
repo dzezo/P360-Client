@@ -29,24 +29,24 @@ public class GuiTexture {
 		return position;
 	}
 
-	public void setPosition(Vector2f position) {
-		this.position = position;
+	public void setPosition(float x, float y) {
+		this.position.set(x, y);
 	}
 	
 	public Vector3f getRotation() {
 		return rotation;
 	}
 	
-	public void setRotation(Vector3f rotation) {
-		this.rotation = rotation;
+	public void setRotation(float rx, float ry, float rz) {
+		this.rotation.set(rx, ry, rz);
 	}
 
 	public Vector2f getScale() {
 		return scale;
 	}
 
-	public void setScale(Vector2f scale) {
-		this.scale = scale;
+	public void setScale(float sx, float sy) {
+		this.scale.set(sx, sy);
 	}
 	
 }

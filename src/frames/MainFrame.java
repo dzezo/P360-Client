@@ -30,7 +30,6 @@ import touring.TourManager;
 import utils.ChooserUtils;
 import utils.ConfigData;
 import utils.DialogUtils;
-import videoPlayer.VideoPlayer;
 
 @SuppressWarnings("serial")
 public class MainFrame extends Frame {
@@ -111,6 +110,7 @@ public class MainFrame extends Frame {
 		this.setVisible(true);
 		this.pack();
 		this.setLocationRelativeTo(null);
+		this.setMinimumSize(this.getPreferredSize());
 		
 		// Frame Listener
 		this.addWindowListener(new WindowAdapter() 
@@ -221,9 +221,9 @@ public class MainFrame extends Frame {
 		
 		// Add to new map
 		int spawnX, spawnY;
-		spawnX = MapViewFrame.getInstance().getMapPanel().getOriginX();
-		spawnY = MapViewFrame.getInstance().getMapPanel().getOriginY();
-		PanGraph.addNode(imagePath, spawnX, spawnY);
+		spawnX = MapViewFrame.getInstance().getMapPanel().getOrigin().x;
+		spawnY = MapViewFrame.getInstance().getMapPanel().getOrigin().y;
+		PanGraph.addNode(imagePath, -spawnX, -spawnY);
 		PanGraph.setName(PanGraph.DEFAULT_NAME);
 		
 		// Queue image for loading

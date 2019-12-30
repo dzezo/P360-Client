@@ -3,7 +3,6 @@ package gui;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 
 import glRenderer.DisplayManager;
 import utils.Loader;
@@ -17,7 +16,7 @@ public abstract class GuiButton implements IButton {
 	
 	public GuiButton(String texturePath, Vector2f position, Vector2f scale) {
 		guiTexture = new GuiTexture(Loader.loadTexture(texturePath), position, scale);
-		originalScale = scale;
+		originalScale = new Vector2f(scale);
 	}
 
 	public void show(List<GuiTexture> list) {
@@ -35,11 +34,11 @@ public abstract class GuiButton implements IButton {
 	}
 
 	public void playHoverAnimation(float scaleFactor) {
-		guiTexture.setScale(new Vector2f(originalScale.x + scaleFactor, originalScale.y + scaleFactor));
+		guiTexture.setScale(originalScale.x + scaleFactor, originalScale.y + scaleFactor);
 	}
 
 	public void resetScale() {
-		guiTexture.setScale(originalScale);
+		guiTexture.setScale(originalScale.x, originalScale.y);
 	}
 	
 	public void update() {
@@ -62,7 +61,7 @@ public abstract class GuiButton implements IButton {
 	public boolean mouseOver() {
 		Vector2f location = guiTexture.getPosition();
 		Vector2f scale = guiTexture.getScale();
-		Vector2f mouseCoords = DisplayManager.getNormalizedMouseCoords();
+		Vector2f mouseCoords = DisplayManager.getNormalizedCursorPosition();
 		
 		return (location.y + scale.y > -mouseCoords.y 
 				&& location.y - scale.y < -mouseCoords.y
@@ -83,15 +82,15 @@ public abstract class GuiButton implements IButton {
 	 * Sets gui button positon on xy plane
 	 * @param pos - x,y position of gui element, can range from -1 to +1
 	 */
-	public void setPosition(Vector2f pos) {
-		guiTexture.setPosition(pos);
+	public void setPosition(float x, float y) {
+		guiTexture.setPosition(x, y);
 	}
 	
 	/**
 	 * Sets gui button rotation on xy plane
 	 * @param rot - rotation is in degrees
 	 */
-	public void setRotation(Vector3f rot) {
-		guiTexture.setRotation(rot);
+	public void setRotation(float rx, float ry, float rz) {
+		guiTexture.setRotation(rx, ry, rz);
 	}
 }

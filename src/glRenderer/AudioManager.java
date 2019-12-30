@@ -62,14 +62,14 @@ public class AudioManager implements Runnable {
 		}
 		
 		// Automatically pause audio once video player is requested
-		if(MainFrame.getInstance().getVideoPlayer().getFrame().isVisible()
+		if(MainFrame.getInstance().getVideoPlayer().isVisible()
 				&& myActivePano.isAudioPlaying()
 				&& !audioPaused) 
 		{
 			myActivePano.pauseAudio();
 			audioPaused = true;
 		}
-		else if(!MainFrame.getInstance().getVideoPlayer().getFrame().isVisible()
+		else if(!MainFrame.getInstance().getVideoPlayer().isVisible()
 				&& audioPaused) 
 		{
 			myActivePano.playAudio();

@@ -46,10 +46,9 @@ public class InputManager {
 	
 	// Mouse movement config
 	private static Vector2f prevMouseDisplayPos = new Vector2f(0, 0);
-	private static Vector2f mouseDisplayPos = new Vector2f(0, 0);
 	private static long lastMouseMoveTime;
 	private static long mouseHideLatency = 3000; // in milis
-	private	static final float mouseSensitivity = 0.1f;
+	private	static final float mouseSensitivity = 0.05f;
 	
 	// Mouse double click
 	private static boolean click = false;
@@ -349,15 +348,17 @@ public class InputManager {
 	}
 	
 	private static boolean isMouseMoving() {
-		mouseDisplayPos = DisplayManager.getNormalizedMouseCoords();
+		Vector2f cursorPosition = DisplayManager.getNormalizedCursorPosition();
 		
-		if(mouseDisplayPos.x != prevMouseDisplayPos.x || mouseDisplayPos.y != prevMouseDisplayPos.y) {
-			prevMouseDisplayPos = mouseDisplayPos;
+		if(cursorPosition.getX() != prevMouseDisplayPos.getX() || 
+				cursorPosition.getY() != prevMouseDisplayPos.getY()) 
+		{
+			prevMouseDisplayPos.set(cursorPosition.getX(), cursorPosition.getY());
 			lastMouseMoveTime = System.currentTimeMillis();
 			return true;
 		}
 		else {
-			prevMouseDisplayPos = mouseDisplayPos;
+			prevMouseDisplayPos.set(cursorPosition.getX(), cursorPosition.getY());
 			return false;
 		}
 	}

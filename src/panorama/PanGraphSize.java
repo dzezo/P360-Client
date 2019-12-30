@@ -5,10 +5,10 @@ import java.io.Serializable;
 public class PanGraphSize implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	protected int NORTH;
-	protected int SOUTH;
-	protected int WEST;
-	protected int EAST;
+	private int NORTH;
+	private int SOUTH;
+	private int WEST;
+	private int EAST;
 	
 	public PanGraphSize() {
 		NORTH = SOUTH = WEST = EAST = 0;
@@ -22,10 +22,27 @@ public class PanGraphSize implements Serializable {
 		return (NORTH + SOUTH) / 2;
 	}
 	
-	public void updateSize(int x, int y) {
-		if(x <= WEST) WEST = x;
-		if(x >= EAST) EAST = x;
-		if(y <= NORTH) NORTH = y;
-		if(y >= SOUTH) SOUTH = y;
+	public void updateSize() {
+		if(PanGraph.isEmpty()) {
+			NORTH = SOUTH = WEST = EAST = 0;
+			return;
+		}
+		
+		PanNode node = PanGraph.getHead();
+		WEST = EAST = node.getMapNode().x;
+		NORTH = SOUTH = node.getMapNode().y;
+		
+		while(node != null) {
+			int x = node.getMapNode().x;
+			int y = node.getMapNode().y;
+			
+			if(x <= WEST) WEST = x;
+			if(x >= EAST) EAST = x;
+			if(y <= NORTH) NORTH = y;
+			if(y >= SOUTH) SOUTH = y;
+			
+			node = node.getNext();
+		}
 	}
+	
 }

@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL12.*;
 
 import loaders.ImageLoader;
 import utils.BuffUtils;
+
 public class Texture {
 	protected static final int partsCount = 2;
 	

@@ -17,8 +17,8 @@ public class PanGraph {
 	private static String name;
 	private static int nodeCount = 0;
 	
-	// graph scale
-	private static PanGraphSize size = new PanGraphSize();
+	// graph graphSize
+	private static PanGraphSize graphSize = new PanGraphSize();
 	
 	// graph path
 	private static TourPath tour = new TourPath();
@@ -46,9 +46,6 @@ public class PanGraph {
 		
 		// Update node count
 		nodeCount++;
-		
-		// Update map size
-		updateMapSize();
 	}
 	
 	public static void setHome(PanNode node) {
@@ -56,23 +53,23 @@ public class PanGraph {
 	}
 	
 	public static boolean loadMap(String loadPath) {
-		PanNode gHead, gHome;
-		int gNodeCount;
-		PanGraphSize gSize;
-		TourPath gTour;
+		PanNode 		newHead;
+		PanNode			newHome;
+		int 			newNodeCount;
+		PanGraphSize	newGraphSize;
+		TourPath 		newTour;
 		
 		try {
 			FileInputStream fin = new FileInputStream(loadPath);
 			ObjectInputStream ois = new ObjectInputStream(fin);
-			gHead = (PanNode) ois.readObject();
-			gHome = (PanNode) ois.readObject();
+			newHead = (PanNode) ois.readObject();
+			newHome = (PanNode) ois.readObject();
 			name = (String) ois.readObject();
-			gNodeCount = (int) ois.readObject();
+			newNodeCount = (int) ois.readObject();
+			newGraphSize = (PanGraphSize) ois.readObject();
+			newTour = (TourPath) ois.readObject();
 			
-			gSize = (PanGraphSize) ois.readObject();
-			gTour = (TourPath) ois.readObject();
-			
-			PanNode node = gHead;
+			PanNode node = newHead;
 			while(node != null) {
 				byte[] iconData = (byte[]) ois.readObject();
 				node.getMapNode().icon.init(iconData);
@@ -88,7 +85,7 @@ public class PanGraph {
 		}
 		
 		// path checking
-		PanNode start = gHead;
+		PanNode start = newHead;
 		
 		// Path to the last manually loaded image/audio file
 		String lastImageLoc = null;
@@ -174,7 +171,7 @@ public class PanGraph {
 				
 				start.setAudio(newAudioPath);
 			}
-			// Video not found
+			// Video Not found
 			else if(videoFile != null && !videoFile.exists()) {
 				String videoName = start.getMapNode().getNameFromPath(videoFile.getPath());
 				
@@ -216,12 +213,13 @@ public class PanGraph {
 		ConfigData.setLastUsedMap(loadPath);
 		
 		// success
-		head = gHead;
-		home = gHome;
+		head = newHead;
+		home = newHome;
 		name = loadPath;
-		nodeCount = gNodeCount;
-		size = gSize;
-		tour = gTour;
+		nodeCount = newNodeCount;
+		graphSize = newGraphSize;
+		graphSize.updateSize();
+		tour = newTour;
 		
 		return true;
 	}
@@ -260,7 +258,7 @@ public class PanGraph {
 		nodeCount = 0;
 		
 		tour = new TourPath();
-		size = new PanGraphSize();
+		graphSize = new PanGraphSize();
 	}
 	
 	public static PanNode getNode(int id) {
@@ -281,30 +279,8 @@ public class PanGraph {
 		return tour.getPath();
 	}
 	
-	public static int getCenterX() {
-		return size.getCenterX();
-	}
-	
-	public static int getCenterY() {
-		return size.getCenterY();
-	}
-	
-	public static void updateMapSize() {
-		if(isEmpty()) return;
-		
-		PanNode node = head;
-		
-		size.WEST = size.EAST = node.getMapNode().x;
-		size.NORTH = size.SOUTH = node.getMapNode().y;
-		
-		while(node != null) {
-			int x = node.getMapNode().x;
-			int y = node.getMapNode().y;
-			
-			size.updateSize(x, y);
-			
-			node = node.getNext();
-		}
+	public static PanGraphSize getGraphSize() {
+		return graphSize;
 	}
 
 	public static String getName() {

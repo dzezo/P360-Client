@@ -5,7 +5,6 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 
 import frames.MainFrame;
 import frames.MapViewFrame;
@@ -253,8 +252,8 @@ public class GuiNavButtons {
 	}
 	
 	public static boolean isMouseNear() {
-		Vector2f mouseCoord = DisplayManager.getNormalizedMouseCoords();
-		if(Math.abs(mouseCoord.x) > btnArea || Math.abs(mouseCoord.y) > btnArea)
+		Vector2f cursorPosition = DisplayManager.getNormalizedCursorPosition();
+		if(Math.abs(cursorPosition.x) > btnArea || Math.abs(cursorPosition.y) > btnArea)
 			return true;
 		else
 			return false;
@@ -312,27 +311,27 @@ public class GuiNavButtons {
 			}
 			
 			// Setting nav. btn. positon
-			navTop.setPosition(new Vector2f(posX, posY));
-			navBot.setPosition(new Vector2f(-posX, -posY));
-			navRight.setPosition(new Vector2f(posY, -posX));
-			navLeft.setPosition(new Vector2f(-posY, posX));
+			navTop.setPosition(posX, posY);
+			navBot.setPosition(-posX, -posY);
+			navRight.setPosition(posY, -posX);
+			navLeft.setPosition(-posY, posX);
 			
 			// Setting nav. btn. rotation to match new position
-			navTop.setRotation(new Vector3f(0, 0, f_yaw));
-			navBot.setRotation(new Vector3f(0, 0, f_yaw));
-			navRight.setRotation(new Vector3f(0, 0, f_yaw));
-			navLeft.setRotation(new Vector3f(0, 0, f_yaw));
+			navTop.setRotation(0, 0, f_yaw);
+			navBot.setRotation(0, 0, f_yaw);
+			navRight.setRotation(0, 0, f_yaw);
+			navLeft.setRotation(0, 0, f_yaw);
 		}
 		else {
-			navTop.setPosition(new Vector2f(0, btnLocation));
-			navBot.setPosition(new Vector2f(0, -btnLocation));
-			navRight.setPosition(new Vector2f(btnLocation, 0));
-			navLeft.setPosition(new Vector2f(-btnLocation, 0));
+			navTop.setPosition(0, btnLocation);
+			navBot.setPosition(0, -btnLocation);
+			navRight.setPosition(btnLocation, 0);
+			navLeft.setPosition(-btnLocation, 0);
 			
-			navTop.setRotation(new Vector3f(0, 0, 0));
-			navBot.setRotation(new Vector3f(0, 0, 0));
-			navRight.setRotation(new Vector3f(0, 0, 0));
-			navLeft.setRotation(new Vector3f(0, 0, 0));
+			navTop.setRotation(0, 0, 0);
+			navBot.setRotation(0, 0, 0);
+			navRight.setRotation(0, 0, 0);
+			navLeft.setRotation(0, 0, 0);
 		}
 		
 		// Detecting mouse events on nav. btn.
