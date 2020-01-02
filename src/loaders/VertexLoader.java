@@ -1,4 +1,4 @@
-package utils;
+package loaders;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,9 @@ import static org.lwjgl.opengl.GL30.*;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
-public class Loader {
+import utils.BuffUtils;
+
+public class VertexLoader {
 	private static List<Integer> vaos = new ArrayList<Integer>();
 	private static List<Integer> vbos = new ArrayList<Integer>();
 	private static List<Integer> textures = new ArrayList<Integer>();

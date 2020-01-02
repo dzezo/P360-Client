@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import glRenderer.Scene;
+import utils.StringUtils;
 
 public class PanNode implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -167,7 +168,7 @@ public class PanNode implements Serializable {
 	
 	public void setPanoramaPath(String panoramaPath) {
 		this.panoramaPath = panoramaPath;
-		mapNode.panName = mapNode.getNameFromPath(panoramaPath);
+		mapNode.panName = StringUtils.getNameFromPath(panoramaPath);
 	}
 	
 	/* susedi cvora */
@@ -221,7 +222,7 @@ public class PanNode implements Serializable {
 	public void setAudio(String audioPath) {
 		if(audioPath != null) {
 			this.audio = new PanAudio(audioPath);
-			mapNode.audioName = mapNode.getNameFromPath(audioPath);
+			mapNode.audioName = StringUtils.getNameFromPath(audioPath);
 		}
 		else {
 			this.audio = null;
@@ -255,7 +256,7 @@ public class PanNode implements Serializable {
 		// set video path
 		if(videoPath != null) {
 			this.videoPath = new String(videoPath);
-			mapNode.videoName = mapNode.getNameFromPath(videoPath);
+			mapNode.videoName = StringUtils.getNameFromPath(videoPath);
 		}
 		else {
 			this.videoPath = null;

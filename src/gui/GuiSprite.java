@@ -2,14 +2,14 @@ package gui;
 
 import org.lwjgl.util.vector.Vector2f;
 
-import utils.Loader;
+import loaders.VertexLoader;
 
 public abstract class GuiSprite implements ISprite {
 	private GuiTexture guiTexture;
 	private boolean isHidden = true;
 	
 	public GuiSprite(String texturePath, Vector2f position, Vector2f scale) {
-		guiTexture = new GuiTexture(Loader.loadTexture(texturePath), position, scale);
+		guiTexture = new GuiTexture(VertexLoader.loadTexture(texturePath), position, scale);
 	}
 	
 	public void show() {

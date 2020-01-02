@@ -1,6 +1,6 @@
 package gui;
 
-import utils.Loader;
+import loaders.VertexLoader;
 
 public class GuiQuad {
 	private int vaoID;
@@ -8,7 +8,7 @@ public class GuiQuad {
 	
 	public GuiQuad() {
 		float[] positions = { -1, 1, -1, -1, 1, 1, 1, -1};
-		vaoID = Loader.loadToVAO(positions);
+		vaoID = VertexLoader.loadToVAO(positions);
 		vertexCount = positions.length / 2;
 	}
 	

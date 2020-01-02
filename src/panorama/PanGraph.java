@@ -5,9 +5,9 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 
 import touring.TourPath;
-import utils.ChooserUtils;
 import utils.ConfigData;
 import utils.DialogUtils;
+import utils.StringUtils;
 
 public class PanGraph {
 	public static final String DEFAULT_NAME = "New Map";
@@ -106,7 +106,7 @@ public class PanGraph {
 			// Image Not Found
 			if(!imageFile.exists()) {
 				// get image name
-				String imageName = start.getMapNode().panName;
+				String imageName = StringUtils.getNameFromPath(start.getPanoramaPath());
 				
 				// creating path: mapLocation\Images\imageName
 				File imageFile1 = new File(mapLoc.concat("\\Images\\").concat(imageName));
@@ -131,7 +131,7 @@ public class PanGraph {
 					if(!replace) return false;
 					
 					// user requested replacement -> open image dialog 
-					newPanoramaPath = lastImageLoc = ChooserUtils.openImageDialog();
+					newPanoramaPath = lastImageLoc = DialogUtils.openImageDialog();
 				}
 				
 				if(newPanoramaPath != null) {
@@ -141,7 +141,7 @@ public class PanGraph {
 			// Audio Not Found
 			else if(audioFile != null && !audioFile.exists()) {
 				// get audio name
-				String audioName = start.getMapNode().getNameFromPath(audioFile.getPath());
+				String audioName = StringUtils.getNameFromPath(audioFile.getPath());
 				
 				// creating path: mapLocation\Audio\audioName
 				File audioFile1 = new File(mapLoc.concat("\\Audio\\").concat(audioName));
@@ -165,7 +165,7 @@ public class PanGraph {
 					boolean replace = DialogUtils.replacePathDialog(audioFile.getPath());
 					if(!replace) {
 						// user requested replacement -> open audio dialog 
-						newAudioPath = lastAudioLoc = ChooserUtils.openAudioDialog();
+						newAudioPath = lastAudioLoc = DialogUtils.openAudioDialog();
 					}
 				}
 				
@@ -173,7 +173,7 @@ public class PanGraph {
 			}
 			// Video Not found
 			else if(videoFile != null && !videoFile.exists()) {
-				String videoName = start.getMapNode().getNameFromPath(videoFile.getPath());
+				String videoName = StringUtils.getNameFromPath(videoFile.getPath());
 				
 				// creating path: mapLocation\Video\videoName
 				File videoFile1 = new File(mapLoc.concat("\\Video\\").concat(videoName));
@@ -197,7 +197,7 @@ public class PanGraph {
 					boolean replace = DialogUtils.replacePathDialog(videoFile.getPath());
 					if(replace) {
 						// user requested replacement -> open video dialog 
-						newVideoPath = lastVideoLoc = ChooserUtils.openVideoDialog();
+						newVideoPath = lastVideoLoc = DialogUtils.openVideoDialog();
 					}
 				}
 				

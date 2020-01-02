@@ -5,7 +5,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
 
 import glRenderer.DisplayManager;
-import utils.Loader;
+import loaders.VertexLoader;
 
 public abstract class GuiButton implements IButton {
 	
@@ -15,7 +15,7 @@ public abstract class GuiButton implements IButton {
 	private boolean isHovering = false;
 	
 	public GuiButton(String texturePath, Vector2f position, Vector2f scale) {
-		guiTexture = new GuiTexture(Loader.loadTexture(texturePath), position, scale);
+		guiTexture = new GuiTexture(VertexLoader.loadTexture(texturePath), position, scale);
 		originalScale = new Vector2f(scale);
 	}
 

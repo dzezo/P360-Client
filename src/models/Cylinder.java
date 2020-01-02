@@ -1,7 +1,8 @@
 package models;
 
 import static org.lwjgl.opengl.GL11.*;
-import utils.Loader;
+
+import loaders.VertexLoader;
 
 public class Cylinder extends Body {
 	private static final int primitiveType = GL_TRIANGLE_STRIP;
@@ -54,7 +55,7 @@ public class Cylinder extends Body {
 			indices[vertexIndex] = vertexIndex++;
 		}
 		
-		vaoID = Loader.loadToVAO(posCoords, texCoords, indices, vbosID);
+		vaoID = VertexLoader.loadToVAO(posCoords, texCoords, indices, vbosID);
 		texID = textureID;
 	}
 

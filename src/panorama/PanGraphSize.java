@@ -29,8 +29,11 @@ public class PanGraphSize implements Serializable {
 		}
 		
 		PanNode node = PanGraph.getHead();
+		
 		WEST = EAST = node.getMapNode().x;
 		NORTH = SOUTH = node.getMapNode().y;
+		
+		node = node.getNext();
 		
 		while(node != null) {
 			int x = node.getMapNode().x;

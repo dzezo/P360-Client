@@ -27,7 +27,6 @@ import input.InputManager;
 import panorama.PanGraph;
 import panorama.PanNode;
 import touring.TourManager;
-import utils.ChooserUtils;
 import utils.ConfigData;
 import utils.DialogUtils;
 
@@ -213,17 +212,14 @@ public class MainFrame extends Frame {
 			if(dialogRes != DialogUtils.YES) return;
 		}
 		
-		String imagePath = ChooserUtils.openImageDialog();
+		String imagePath = DialogUtils.openImageDialog();
 		if(imagePath == null) return;
 		
 		// Set new map flag
 		PanGraph.removeMap();
 		
 		// Add to new map
-		int spawnX, spawnY;
-		spawnX = MapViewFrame.getInstance().getMapPanel().getOrigin().x;
-		spawnY = MapViewFrame.getInstance().getMapPanel().getOrigin().y;
-		PanGraph.addNode(imagePath, -spawnX, -spawnY);
+		PanGraph.addNode(imagePath, 0, 0);
 		PanGraph.setName(PanGraph.DEFAULT_NAME);
 		
 		// Queue image for loading

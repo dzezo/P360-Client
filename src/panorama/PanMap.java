@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.util.Iterator;
 
 import frames.MapPanel;
+import utils.StringUtils;
 
 public class PanMap extends Rectangle {
 	private static final long serialVersionUID = 1L;
@@ -68,17 +69,10 @@ public class PanMap extends Rectangle {
 	public PanMap(PanNode parent, int x, int y) {
 		super(x, y, WIDTH, HEIGHT);
 		this.parent = parent;
-		this.panName = getNameFromPath(parent.getPanoramaPath());
+		this.panName = StringUtils.getNameFromPath(parent.getPanoramaPath());
 		this.icon = new PanMapIcon(this);
 		
 		calculatePorts(x,y);       
-	}
-	
-	public String getNameFromPath(String path) {
-		String separator = System.getProperty("file.separator");
-		int lastSeparatorIndex = path.lastIndexOf(separator);
-		
-		return path.substring(lastSeparatorIndex + 1);
 	}
 	
 	public boolean isPressed(int x, int y, int oX, int oY) {

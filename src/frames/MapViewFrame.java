@@ -17,7 +17,7 @@ import glRenderer.Scene;
 import loaders.IconLoader;
 import panorama.PanGraph;
 import panorama.PanNode;
-import utils.ChooserUtils;
+import utils.DialogUtils;
 
 @SuppressWarnings("serial")
 public class MapViewFrame extends MapFrame {
@@ -123,7 +123,7 @@ public class MapViewFrame extends MapFrame {
 	
 	public boolean load() {
 		// get path
-		String loadPath = ChooserUtils.openMapDialog();
+		String loadPath = DialogUtils.openMapDialog();
 		if(loadPath == null) return false;
 		
 		// load

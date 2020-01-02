@@ -1,7 +1,8 @@
 package models;
 
 import static org.lwjgl.opengl.GL11.*;
-import utils.Loader;
+
+import loaders.VertexLoader;
 
 public class Sphere extends Body {
 	private static final int primitiveType = GL_TRIANGLES;
@@ -52,7 +53,7 @@ public class Sphere extends Body {
 		
 		generateIndices();
 		
-		vaoID = Loader.loadToVAO(posCoords, texCoords, indices, vbosID);
+		vaoID = VertexLoader.loadToVAO(posCoords, texCoords, indices, vbosID);
 		texID = textureID;
 	}
 	
